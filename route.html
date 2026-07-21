@@ -65,8 +65,15 @@ th,td{border:1px solid #F0EBE0;padding:0}
 thead th{background:#F7F3EA;font-size:8px;letter-spacing:.07em;text-transform:uppercase;
   color:#7A7266;font-weight:700;padding:4px 6px;text-align:left}
 td input{width:100%;font:inherit;font-size:11px;border:none;background:none;padding:4px 6px}
-td input:focus{outline:2px solid #B8922A;outline-offset:-2px;background:#FFFDF6;
+td textarea{width:100%;font:inherit;font-size:11px;border:none;background:none;
+  padding:4px 6px;resize:none;overflow:hidden;line-height:1.35;display:block;min-height:0}
+td input:focus,td textarea:focus{outline:2px solid #B8922A;outline-offset:-2px;background:#FFFDF6;
   position:relative;z-index:3}
+td{vertical-align:top}
+td.c1 textarea{font-weight:700;font-size:10.5px}
+td.c2 textarea{font-weight:700;text-transform:uppercase;font-size:10.5px}
+table.ck td.gc textarea{font-size:10px;font-weight:600}
+table.ck td.cm textarea{font-size:9.5px;color:#7A7266}
 td.c1{width:78px} td.c1 input{font-weight:700;font-size:10.5px}
 td.c2 input{font-weight:700;text-transform:uppercase;font-size:10.5px}
 td.c3{width:96px}
@@ -110,29 +117,50 @@ body.tf-lecture .plusg,body.tf-lecture .delr{display:none!important}
 @media(max-width:1100px){.deux{grid-template-columns:1fr}.grille3{grid-template-columns:1fr}}
 </style><style>
 @media print{
- @page{size:A4 portrait;margin:8mm}
+ @page{size:A4 portrait;margin:6mm}
  #tfbar,#tfband,.nav,.act,#etat,.plusg,.delr,td.sup{display:none!important}
- header{border:none;padding:0 0 2mm;display:block}
- header h1{font-size:12pt;letter-spacing:.14em;display:inline-block}
- header .jr{display:inline-block;font-size:10.5pt;margin-left:8mm;min-width:auto}
- header .jr small{display:inline;margin-left:4mm;font-size:7pt}
- body{background:#fff;font-size:8pt}
+ header{border:none;padding:0 0 1mm;display:block}
+ header h1{font-size:10.5pt;letter-spacing:.13em;display:inline-block}
+ header .jr{display:inline-block;font-size:9.5pt;margin-left:6mm;min-width:auto}
+ header .jr small{display:inline;margin-left:3mm;font-size:6.5pt}
+ body{background:#fff;font-size:6.8pt}
  main{padding:0;max-width:none}
- .deux{gap:3mm}
- .bloc,.cons,.proverbe{border-color:#aaa;border-radius:0;margin-bottom:2.5mm;
+ .proverbe{border-color:#aaa;border-radius:0;padding:1mm 2.5mm;margin-bottom:1.6mm}
+ .proverbe input{font-size:7pt}
+ .proverbe label{font-size:5.5pt}
+ .deux{gap:2mm;grid-template-columns:1.35fr 1fr}
+ .bloc,.cons{border-color:#aaa;border-radius:0;margin-bottom:1.6mm;
    page-break-inside:avoid}
  .bt{-webkit-print-color-adjust:exact;print-color-adjust:exact;
-   font-size:7.5pt;padding:1.2mm 2.5mm}
+   font-size:6.2pt;padding:.8mm 2mm;letter-spacing:.1em}
  .bt.pdj{background:#1E5878!important} .bt.dej{background:#A8321F!important}
  .bt.chk{background:#B8922A!important}
  .bt:not(.pdj):not(.dej):not(.chk){background:#1F1B16!important}
+ .bt input.tot{font-size:7.5pt;width:9mm;padding:0 1mm}
+ .bt .lab{font-size:5pt}
  th,td{border-color:#bbb!important}
- thead th,table.ck td.sn{background:#EFEAE0!important;
+ thead th{font-size:5.2pt;padding:.7mm 1.2mm;background:#EFEAE0!important;
    -webkit-print-color-adjust:exact;print-color-adjust:exact}
- tr.wsep td{background:#FFF8E6!important;
+ td input{font-size:6.6pt;padding:.6mm 1.2mm}
+ td textarea{font-size:6.6pt;padding:.6mm 1.2mm;line-height:1.3}
+ table.ck td.gc textarea{font-size:6pt}
+ table.ck td.cm textarea{font-size:5.6pt}
+ td.c1{width:17mm} td.c3{width:17mm} td.c4{width:7mm}
+ table.ck td.sn{background:#EFEAE0!important;font-size:5.8pt;padding:.5mm 1.5mm;
+   width:19mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ table.ck td.gc input{font-size:6pt}
+ table.ck td.pt{width:7mm}
+ table.ck td.pt input{font-size:5.8pt;padding:.5mm .5mm}
+ table.ck td.cm{width:19mm}
+ table.ck td.cm input{font-size:5.6pt}
+ tr.wsep td{background:#FFF8E6!important;font-size:5.5pt;padding:.5mm 1.5mm;
    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .grille3{grid-template-columns:repeat(3,1fr);gap:2mm}
+ .cons .in{padding:1mm 2mm}
+ .cons label{font-size:5pt;margin:.6mm 0 0}
+ .cons input,.cons textarea{font-size:6.4pt;padding:.4mm .3mm;min-height:0}
+ .cons .nb{font-size:8pt}
  input,textarea{color:#1F1B16!important}
- .grille3{grid-template-columns:repeat(3,1fr)}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -297,7 +325,8 @@ function tableService(liste, colonnes, ajout){
     const r=document.createElement('tr');
     colonnes.forEach(c=>{
       const td=document.createElement('td'); td.className=c.cls||'';
-      td.appendChild(inp(l[c.k],'','',v=>l[c.k]=v));
+      if(c.cls==='c4') td.appendChild(inp(l[c.k],'','',v=>l[c.k]=v));
+      else td.appendChild(zone(l[c.k],'',v=>l[c.k]=v));
       r.appendChild(td);
     });
     const ts=document.createElement('td'); ts.className='sup';
@@ -351,19 +380,19 @@ function blocChecklist(){
     tr.appendChild(x); });
   th.appendChild(tr); t.appendChild(th);
   const tb=document.createElement('tbody');
-  const ligne=(zone,sal)=>{
-    const c=ck(zone,sal);
+  const ligne=(zn,sal)=>{
+    const c=ck(zn,sal);
     const l=document.createElement('tr');
     const tn=document.createElement('td'); tn.className='sn'; tn.textContent=sal;
     l.appendChild(tn);
     const tg=document.createElement('td'); tg.className='gc';
-    tg.appendChild(inp(c.g,'','',v=>c.g=v)); l.appendChild(tg);
+    tg.appendChild(zone(c.g,'',v=>c.g=v)); l.appendChild(tg);
     const tr2=document.createElement('td'); tr2.className='pt';
     tr2.appendChild(inp(c.r,'','',v=>c.r=v)); l.appendChild(tr2);
     const td2=document.createElement('td'); td2.className='pt';
     td2.appendChild(inp(c.d,'','',v=>c.d=v)); l.appendChild(td2);
     const tc=document.createElement('td'); tc.className='cm';
-    tc.appendChild(inp(c.c,'','',v=>c.c=v)); l.appendChild(tc);
+    tc.appendChild(zone(c.c,'',v=>c.c=v)); l.appendChild(tc);
     tb.appendChild(l);
   };
   SALONS_H.forEach(s=>ligne('ck',s));

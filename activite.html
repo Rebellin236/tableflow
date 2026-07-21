@@ -87,6 +87,10 @@ table.tj th.w{background:#FFF8E6;color:#8a7320}
 table.tj td input{width:100%;font:inherit;border:none;background:none;
   padding:3px 2px;text-align:center;font-size:9.5px;font-weight:700}
 table.tj td.n input{text-align:left;padding-left:5px;font-size:9px}
+table.tj td.n textarea{width:100%;font:inherit;font-size:9px;font-weight:700;border:none;
+  background:none;padding:3px 14px 3px 5px;resize:none;overflow:hidden;line-height:1.3;display:block}
+table.tj td.n textarea:focus{outline:2px solid #B8922A;outline-offset:-2px;
+  background:#FFFDF6;position:relative;z-index:3}
 table.tj td.w{background:#FFFCF2}
 table.tj td input:focus{outline:2px solid #B8922A;outline-offset:-2px;
   background:#FFFDF6;position:relative;z-index:3}
@@ -111,8 +115,20 @@ table.tj tr:hover .delr,.gcli:hover .delr{display:block}
 /* groupes de service */
 .gsvc{border-bottom:1px solid #E2DACA;padding:4px 7px 5px;position:relative}
 .gcli{position:relative}
-.gcli input{width:100%;font:inherit;font-size:10px;font-weight:700;border:none;
-  background:none;padding:2px 1px;letter-spacing:.02em;text-transform:uppercase}
+.gcli input,.gcli textarea{width:100%;font:inherit;font-size:10px;font-weight:700;border:none;
+  background:none;padding:2px 16px 2px 1px;letter-spacing:.02em;text-transform:uppercase;
+  resize:none;overflow:hidden;line-height:1.35;display:block}
+.gcli textarea:focus{outline:2px solid #B8922A;outline-offset:-2px;background:#FFFDF6}
+.col-btn{position:absolute;top:2px;right:14px;width:12px;height:12px;border:1px solid #CFC6B4;
+  border-radius:50%;cursor:pointer;padding:0;display:none;z-index:4}
+table.tj tr:hover .col-btn,.gcli:hover .col-btn{display:block}
+.pal{position:absolute;top:16px;right:0;background:#fff;border:1px solid #E2DACA;
+  border-radius:7px;padding:5px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+  z-index:60;box-shadow:0 4px 14px rgba(31,27,22,.18)}
+.pal button{width:20px;height:20px;border:1px solid #D8D0BE;border-radius:5px;
+  cursor:pointer;font-size:11px;color:#A89F8F;padding:0;line-height:1}
+.pal button:hover{border-color:#B8922A}
+body.tf-lecture .col-btn{display:none!important}
 .gnh{display:flex;align-items:center;gap:3px;margin-top:1px}
 .gnh label{font-size:7px;letter-spacing:.05em;text-transform:uppercase;
   color:#A89F8F;font-weight:700}
@@ -204,6 +220,8 @@ body.tf-lecture .plus,body.tf-lecture .plus2,body.tf-lecture .del{display:none!i
  tr.lbois td{background:#fff!important}
  tr.lbois td.lib{background:#EFEAE0!important}
  input,textarea,select{color:#1F1B16!important}
+ table.tj td,.gsvc{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .col-btn,.pal{display:none!important}
  .gp .nb{color:#A8321F!important}
  .gp .vn.on{color:#8B2A3F!important}
 }
@@ -231,7 +249,8 @@ body.tf-lecture .plus,body.tf-lecture .plus2,body.tf-lecture .del{display:none!i
 <main><div class="feuille" id="feuille"></div></main>
 <script>
 const SUPABASE_URL = "https://auxnjixcppmsqmqkmjsj.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1eG5qaXhjcHBtc3FtcWttanNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NDkzNDIsImV4cCI6MjEwMDEyNTM0Mn0.sHT_4cpxIBaqaGTnLDevCjWcnLe8gn0dG1sTo6dbjXE";const DOC_ID = "activite_resto";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1eG5qaXhjcHBtc3FtcWttanNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NDkzNDIsImV4cCI6MjEwMDEyNTM0Mn0.sHT_4cpxIBaqaGTnLDevCjWcnLe8gn0dG1sTo6dbjXE";
+const DOC_ID = "activite_resto";
 const MODULE = "activite";
 
 let sb=null, moi=null, profil=null;
@@ -348,6 +367,31 @@ function pz(j,k){
 }
 
 function autoH(t){ t.style.height='auto'; t.style.height=(t.scrollHeight)+'px'; }
+const COULEURS=['','#FFF3B8','#FFE0C2','#FFD6DC','#E6D9F5','#CFE4F7','#D5EDD8','#E8E8E8'];
+function colorerLigne(tr, c){ [...tr.children].forEach(td=>td.style.background=c||''); }
+function boutonCouleur(hote, obj, cible){
+  const b=document.createElement('button'); b.className='col-btn';
+  b.style.background = obj.col || '#EDE8DC';
+  b.title='Couleur';
+  b.onclick=(e)=>{ e.stopPropagation();
+    document.querySelectorAll('.pal').forEach(p=>p.remove());
+    const p=document.createElement('div'); p.className='pal';
+    COULEURS.forEach(c=>{
+      const x=document.createElement('button');
+      x.style.background = c || '#fff';
+      if(!c) x.textContent='\u00D7';
+      x.onclick=(e2)=>{ e2.stopPropagation(); obj.col=c;
+        if(cible.tagName==='TR') colorerLigne(cible,c);
+        else cible.style.background = c || '';
+        b.style.background = c || '#EDE8DC';
+        p.remove(); tfSauverPlusTard(); };
+      p.appendChild(x);
+    });
+    hote.appendChild(p);
+  };
+  hote.appendChild(b);
+}
+document.addEventListener('click',()=>document.querySelectorAll('.pal').forEach(p=>p.remove()));
 function inp(v,cls,ph,cb){
   const i=document.createElement('input'); i.className=cls; i.value=v||''; i.placeholder=ph||'';
   i.addEventListener('input',()=>{cb(i.value); tfSauverPlusTard();});
@@ -397,7 +441,10 @@ function colJour(j, d){
   x.grpPauses.forEach((g,i)=>{
     const l=document.createElement('tr');
     const tn=document.createElement('td'); tn.className='n';
-    tn.appendChild(inp(g.nom,'','',v=>g.nom=v));
+    const tx=document.createElement('textarea'); tx.rows=1; tx.value=g.nom||'';
+    tx.addEventListener('input',()=>{ g.nom=tx.value; autoH(tx); tfSauverPlusTard(); });
+    setTimeout(()=>autoH(tx),0);
+    tn.appendChild(tx);
     l.appendChild(tn);
     ['ca','caw','pam','pamw','ppm','ppmw'].forEach((k,ki)=>{
       const td=document.createElement('td');
@@ -409,6 +456,9 @@ function colJour(j, d){
     del.onclick=()=>{ x.grpPauses.splice(i,1); render(); tfSauverPlusTard(); };
     l.lastChild.style.position='relative';
     l.lastChild.appendChild(del);
+    if(g.col) colorerLigne(l, g.col);
+    tn.style.position='relative';
+    boutonCouleur(tn, g, l);
     tb.appendChild(l);
   });
   t.appendChild(tb); col.appendChild(t);
@@ -436,8 +486,14 @@ function secService(x, cle, titre, classe){
   z.textContent=titre; w.appendChild(z);
   x[cle].forEach((g,i)=>{
     const b=document.createElement('div'); b.className='gsvc';
+    if(g.col) b.style.background=g.col;
     const l0=document.createElement('div'); l0.className='gcli';
-    l0.appendChild(inp(g.client,'','NOM DU GROUPE',v=>g.client=v));
+    const tc=document.createElement('textarea'); tc.rows=1; tc.value=g.client||'';
+    tc.placeholder='NOM DU GROUPE';
+    tc.addEventListener('input',()=>{ g.client=tc.value; autoH(tc); tfSauverPlusTard(); });
+    setTimeout(()=>autoH(tc),0);
+    l0.appendChild(tc);
+    boutonCouleur(l0, g, b);
     const del=document.createElement('button'); del.className='delr'; del.textContent='\u00D7';
     del.onclick=()=>{ if(confirm('Supprimer ce groupe ?')){
       x[cle].splice(i,1); render(); tfSauverPlusTard(); } };
