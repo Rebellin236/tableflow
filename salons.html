@@ -15,72 +15,117 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:#FCF8F1;color:#1F1
 #tfband button{margin-left:9px;font:inherit;font-size:11px;padding:3px 9px;
   border:1px solid currentColor;background:none;color:inherit;border-radius:5px;cursor:pointer}
 #tfbar{display:flex;align-items:center;gap:12px;padding:8px 16px;background:#fff;
-  border-bottom:1px solid #E8DFC9;font-size:11.5px}
+  border-bottom:1px solid #E2DACA;font-size:11.5px}
 #tfbar a{color:#7A7266;text-decoration:none;font-weight:600;letter-spacing:.06em;
   text-transform:uppercase;font-size:10.5px}
-#tfbar a:hover{color:#B8922A}
-#tfbar .sp{flex:1}
-#tfbar .qui b{color:#1F1B16}
+#tfbar a:hover{color:#B8922A} #tfbar .sp{flex:1} #tfbar .qui b{color:#1F1B16}
 
-header{background:#fff;border-bottom:1px solid #E8DFC9;padding:14px 20px;
-  display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-h1{font-family:'Cinzel',serif;font-size:17px;letter-spacing:.13em;text-transform:uppercase;font-weight:600}
-.nav{display:flex;align-items:center;gap:7px}
-.nav button{font:inherit;font-size:12px;padding:6px 11px;border:1px solid #E8DFC9;
-  background:#fff;border-radius:6px;cursor:pointer;font-weight:500}
+header{background:#fff;border-bottom:1px solid #E2DACA;padding:13px 20px;
+  display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+h1{font-family:'Cinzel',serif;font-size:16px;letter-spacing:.13em;text-transform:uppercase;font-weight:600}
+.nav{display:flex;align-items:center;gap:6px}
+.nav button{font:inherit;font-size:13px;padding:6px 12px;border:1px solid #E2DACA;
+  background:#fff;border-radius:6px;cursor:pointer;font-weight:600;color:#7A7266}
 .nav button:hover{border-color:#B8922A;color:#B8922A}
-.sem{font-family:'Gelasio',serif;font-size:15px;font-weight:700;min-width:250px;text-align:center}
-.sem small{display:block;font-family:'Montserrat';font-size:9.5px;font-weight:500;
+.sem{font-family:'Gelasio',serif;font-size:15px;font-weight:700;min-width:240px;text-align:center}
+.sem small{display:block;font-family:'Montserrat';font-size:9.5px;font-weight:600;
   letter-spacing:.11em;text-transform:uppercase;color:#B8922A;margin-top:1px}
 header .sp{flex:1}
-.act{font:inherit;font-size:11px;padding:7px 13px;border-radius:6px;cursor:pointer;
-  border:1px solid #E8DFC9;background:#fff;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.act{font:inherit;font-size:11px;padding:7px 14px;border-radius:6px;cursor:pointer;
+  border:1px solid #E2DACA;background:#fff;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .act:hover{border-color:#B8922A;color:#B8922A}
 .act.p{background:#1F1B16;color:#fff;border-color:#1F1B16}
 .act.p:hover{background:#B8922A;border-color:#B8922A;color:#fff}
+.aide{font-size:10.5px;color:#7A7266;padding:7px 20px;background:#FBF8F2;
+  border-bottom:1px solid #E2DACA}
+.aide b{color:#1F1B16}
 
-main{padding:18px 20px 60px}
-.zone{margin-bottom:26px}
-.zt{font-family:'Cinzel',serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
-  color:#fff;background:#1E5878;padding:7px 14px;border-radius:6px 6px 0 0;font-weight:600}
-table{width:100%;border-collapse:collapse;background:#fff;
-  border:1px solid #E8DFC9;border-top:none}
-th,td{border:1px solid #E8DFC9;padding:0;vertical-align:top}
-thead th{background:#F7F3EA;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
-  color:#7A7266;font-weight:700;padding:7px 6px;text-align:center}
-thead th.j{font-family:'Gelasio',serif;font-size:12.5px;letter-spacing:0;
-  text-transform:none;color:#1F1B16;font-weight:700}
-thead th.j small{display:block;font-family:'Montserrat';font-size:9px;
-  letter-spacing:.08em;text-transform:uppercase;color:#7A7266;font-weight:600}
-td.sal{background:#F7F3EA;font-weight:700;font-size:11.5px;padding:7px 9px;
-  width:132px;letter-spacing:.03em}
-td.sal.fus{color:#1E5878;font-style:italic}
-.cel{display:grid;grid-template-columns:1fr 46px 62px;min-height:30px}
-.cel input{font:inherit;font-size:11.5px;padding:5px 6px;border:none;
-  border-right:1px solid #F0EBE0;background:none;min-width:0}
-.cel input:focus{outline:2px solid #B8922A;outline-offset:-2px;background:#FFFDF8;position:relative;z-index:2}
-.cel .nb{text-align:center;font-weight:700}
-.cel .dis{border-right:none;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
-.hor{display:block;width:100%;font:inherit;font-size:10.5px;padding:4px 6px;
-  border:none;border-top:1px solid #F0EBE0;background:#EAF2F7;color:#1E5878;
-  text-align:center;font-weight:600;letter-spacing:.04em}
-.hor:focus{outline:2px solid #B8922A;outline-offset:-2px}
-td.vide{background:#FBF9F5}
-tr.tot td{background:#F7F3EA;font-weight:700;font-size:11.5px;text-align:center;padding:6px}
-tr.tot td.sal{text-align:left}
-.wtc td{background:#FFFBF0}
-.wtc td.sal{color:#B8922A}
-body.tf-lecture input{pointer-events:none;background:transparent}
-.vidmsg{padding:30px;text-align:center;color:#7A7266;font-size:12.5px;
-  background:#fff;border:1px dashed #E8DFC9;border-radius:8px}
+main{padding:16px 20px 50px}
+.feuille{background:#fff;border:1px solid #E2DACA;border-radius:8px;overflow:hidden;
+  box-shadow:0 2px 10px rgba(31,27,22,.05)}
+.zt{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+  color:#fff;background:#1E5878;padding:7px 14px;font-weight:600}
+.zt.soir{background:#1F1B16}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th,td{border:1px solid #E2DACA;padding:0;vertical-align:middle}
+thead th{background:#F5F1E8;padding:6px 4px;text-align:center}
+thead th .jn{font-family:'Gelasio',serif;font-size:12.5px;font-weight:700;color:#1F1B16}
+thead th .jd{font-size:9.5px;font-weight:600;letter-spacing:.06em;color:#7A7266;margin-top:1px}
+thead th.suiv{background:#EDE8DC}
+thead th.suiv .jn{color:#7A7266}
+th.cs{width:118px;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:#7A7266;font-weight:700}
+td.sal{background:#F5F1E8;font-weight:700;font-size:11px;padding:5px 8px;
+  letter-spacing:.02em;line-height:1.25}
+td.jour{position:relative;height:38px}
+td.jour.rempli{background:#FEFCF7}
+td.jour.fus{background:#EAF2F7}
+.k{display:flex;flex-direction:column;height:100%}
+.k .r1{display:flex;flex:1;align-items:stretch}
+.k input{font:inherit;border:none;background:none;min-width:0;padding:3px 5px}
+.k input:focus{outline:2px solid #B8922A;outline-offset:-2px;background:#FFFDF6;
+  position:relative;z-index:3}
+.k .cli{flex:1;font-size:11.5px;font-weight:600;letter-spacing:.01em}
+.k .nb{width:34px;text-align:center;font-weight:700;font-size:11.5px;
+  border-left:1px solid #F0EBE0}
+.k .dis{width:52px;font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;
+  border-left:1px solid #F0EBE0;color:#7A7266;font-weight:600}
+.k .hor{border-top:1px solid #F0EBE0;background:#EAF2F7;color:#1E5878;
+  font-size:10px;font-weight:700;text-align:center;letter-spacing:.04em;padding:2px 4px}
+.k .hor:focus{background:#fff}
+.fus-btn{position:absolute;top:1px;right:1px;width:16px;height:16px;border:none;
+  background:none;color:#CFC6B4;font-size:11px;line-height:1;cursor:pointer;
+  border-radius:3px;z-index:2;display:none}
+td.jour:hover .fus-btn{display:block}
+.fus-btn:hover{background:#1E5878;color:#fff}
+.fus-btn.on{display:block;color:#1E5878;font-weight:700}
+tr.total td{background:#F5F1E8;font-weight:700;font-size:12px;text-align:center;
+  padding:5px;color:#1F1B16}
+tr.total td.sal{text-align:left;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:#7A7266}
+tr.wtc td{background:#FFFCF2}
+tr.wtc td.sal{color:#B8922A;background:#FFF8E6}
+tr.wtc input{font-size:11px}
+body.tf-lecture input{pointer-events:none}
+body.tf-lecture .fus-btn{display:none!important}
+
+#mf{display:none;position:fixed;inset:0;background:rgba(31,27,22,.45);z-index:100;
+  align-items:center;justify-content:center;padding:24px}
+#mf.on{display:flex}
+.mfc{background:#fff;border-radius:12px;padding:26px 28px;width:100%;max-width:360px}
+.mfc h3{font-family:'Cinzel',serif;font-size:14px;letter-spacing:.12em;
+  text-transform:uppercase;margin-bottom:6px;font-weight:600}
+.mfc p{font-size:11.5px;color:#7A7266;line-height:1.5;margin-bottom:16px}
+.mfc label{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;
+  font-size:12.5px;cursor:pointer;border:1px solid #E2DACA;margin-bottom:5px;font-weight:600}
+.mfc label:hover{border-color:#B8922A}
+.mfr{display:flex;gap:8px;margin-top:16px}
+.mfr button{flex:1;padding:10px;border-radius:6px;font:inherit;font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;font-weight:700;cursor:pointer}
+.mfr .an{background:none;border:1px solid #E2DACA;color:#7A7266}
+.mfr .ok{background:#1E5878;border:1px solid #1E5878;color:#fff}
 </style><style>
 @media print{
- @page{size:A4 landscape;margin:8mm}
- #tfbar,#tfband,.nav,.act,#etat{display:none!important}
- header{border:none;padding:0 0 6mm}
- body{background:#fff;font-size:9pt}
- table{page-break-inside:avoid}
- .cel input,.hor{border:none}
+ @page{size:A3 landscape;margin:7mm}
+ #tfbar,#tfband,.nav,.act,#etat,.aide,#mf,.fus-btn{display:none!important}
+ header{border:none;padding:0 0 3mm;display:block}
+ header h1{font-size:15pt;letter-spacing:.14em;display:inline-block}
+ header .sem{display:inline-block;font-size:12pt;margin-left:14mm;min-width:auto}
+ header .sem small{display:inline;margin-left:6mm;font-size:8pt}
+ body{background:#fff;font-size:8.5pt}
+ main{padding:0}
+ .feuille{border:1px solid #999;box-shadow:none;border-radius:0}
+ .zt{background:#1E5878!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+     font-size:9pt;padding:2mm 3mm}
+ .zt.soir{background:#1F1B16!important}
+ th,td{border-color:#B5AC98!important}
+ thead th,td.sal,tr.total td{background:#EFEAE0!important;
+   -webkit-print-color-adjust:exact;print-color-adjust:exact}
+ tr.wtc td{background:#FFF8E6!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ td.jour{height:9mm}
+ .k .hor{background:#EAF2F7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ td.jour.fus{background:#EAF2F7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ input{color:#1F1B16!important}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -97,13 +142,30 @@ body.tf-lecture input{pointer-events:none;background:transparent}
     <button id="prec">&larr;</button>
     <div class="sem" id="sem">…</div>
     <button id="suiv">&rarr;</button>
-    <button id="auj">Cette semaine</button>
+    <button id="auj">Aujourd'hui</button>
   </div>
   <span class="sp"></span>
   <span id="etat" style="font-size:10.5px;color:#7A7266"></span>
-  <button class="act" id="imp">Imprimer</button>
+  <button class="act p" id="imp">Imprimer A3</button>
 </header>
-<main><div id="zones"></div></main>
+<div class="aide">
+  Chaque case : <b>groupe</b> · <b>nombre</b> · <b>disposition</b>, et les
+  <b>horaires</b> en bleu dessous. Pour réunir deux salons, survolez la case
+  et cliquez sur la flèche en haut à droite.
+</div>
+<main><div class="feuille" id="feuille"></div></main>
+
+<div id="mf">
+  <div class="mfc">
+    <h3 id="mftitre">Réunir</h3>
+    <p>Sélectionnez les salons à réunir pour cette journée.</p>
+    <div id="mfopts"></div>
+    <div class="mfr">
+      <button class="an" id="mfan">Annuler</button>
+      <button class="ok" id="mfok">Réunir</button>
+    </div>
+  </div>
+</div>
 <script>
 const SUPABASE_URL = "https://auxnjixcppmsqmqkmjsj.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1eG5qaXhjcHBtc3FtcWttanNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NDkzNDIsImV4cCI6MjEwMDEyNTM0Mn0.sHT_4cpxIBaqaGTnLDevCjWcnLe8gn0dG1sTo6dbjXE";const DOC_ID = "planning_salons";
@@ -112,76 +174,71 @@ const MODULE = "salons";
 let sb=null, moi=null, profil=null;
 let jeEdite=false, minuterieVerrou=null, minuterieSauve=null;
 let sauveEnCours=false, sauveDemandee=false;
-let D = {semaines:{}};
-let semaineISO = null;
+let D={semaines:{}}, semaineISO=null;
+let fusCible=null;
 
-const ECRITURE = {admin:1};
-const LECTURE  = {admin:1, maitre_hotel:1, commercial:1, salons_seul:1, revenus:1};
+const ECRITURE={admin:1};
+const LECTURE ={admin:1,maitre_hotel:1,commercial:1,salons_seul:1,revenus:1};
+const JOURS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche','Lundi'];
 
-const SALONS_MATIN = ['PLANIER','RIOU','FRIOUL','PLANIER-RIOU','RIOU-FRIOUL',
-  'PLANIER-RIOU-FRIOUL','RAIMU','PAGNOL','RAIMU-PAGNOL','SAINT-VICTOR','LA MAJOR',
-  'BANDOL','CASSIS','TERRASSE CASSIS','PATIO 1','PATIO 2','LES ACCOULES'];
-const SALONS_SOIR = ['BANDOL','CASSIS','BANDOL/CASSIS','TERRASSE CASSIS','LES ACCOULES'];
-const FUSIONS = ['PLANIER-RIOU','RIOU-FRIOUL','PLANIER-RIOU-FRIOUL','RAIMU-PAGNOL','BANDOL/CASSIS'];
-const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const MATIN=['PLANIER','RIOU','FRIOUL','RAIMU','PAGNOL','SAINT-VICTOR','LA MAJOR',
+             'BANDOL','CASSIS','TERRASSE CASSIS','PATIO 1','PATIO 2','LES ACCOULES'];
+const SOIR =['BANDOL','CASSIS','TERRASSE CASSIS','LES ACCOULES'];
+const FUSIONNABLES={
+  'PLANIER':['RIOU','FRIOUL'], 'RIOU':['FRIOUL'],
+  'RAIMU':['PAGNOL'], 'BANDOL':['CASSIS'], 'CASSIS':['TERRASSE CASSIS'],
+};
 
-// ---------- socle TableFlow ----------
-function tfBandeau(txt,type){
-  let z=document.getElementById('tfband');
-  if(!txt){ z.style.display='none'; return; }
-  z.className='tf-'+(type||'info'); z.innerHTML=txt; z.style.display='block';
-}
+function tfBandeau(t,ty){ const z=document.getElementById('tfband');
+  if(!t){z.style.display='none';return;} z.className='tf-'+(ty||'info');
+  z.innerHTML=t; z.style.display='block'; }
 function tfEtat(m){ const e=document.getElementById('etat'); if(e) e.textContent=m; }
 
 async function tfDemarrer(){
   if(SUPABASE_URL.startsWith('__')){
     tfBandeau("Module non configuré — adresse Supabase manquante.",'err'); return false; }
-  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const {data} = await sb.auth.getSession();
+  sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const {data}=await sb.auth.getSession();
   if(!data.session){ location.href='index.html'; return false; }
-  moi = data.session.user;
-  const {data:p} = await sb.from('profils').select('*').eq('id',moi.id).single();
+  moi=data.session.user;
+  const {data:p}=await sb.from('profils').select('*').eq('id',moi.id).single();
   if(!p){ location.href='index.html'; return false; }
-  profil = p;
+  profil=p;
   if(!LECTURE[p.role]){
     document.body.innerHTML='<div style="padding:60px;text-align:center;color:#7A7266">'+
       '<h2 style="font-family:Cinzel,serif;letter-spacing:.12em;color:#1F1B16">Accès refusé</h2>'+
       '<p style="margin:14px 0 24px">Ce module ne vous est pas attribué.</p>'+
       '<a href="index.html" style="color:#B8922A">Retour à TableFlow</a></div>';
-    return false;
-  }
+    return false; }
   return true;
 }
 async function tfPrendreVerrou(){
-  const {data:v} = await sb.from('verrous').select('*').eq('document_id',DOC_ID).maybeSingle();
-  const limite = Date.now()-10*60*1000;
-  if(v && v.detenu_par!==moi.id && new Date(v.vu_le).getTime()>limite){
+  const {data:v}=await sb.from('verrous').select('*').eq('document_id',DOC_ID).maybeSingle();
+  if(v&&v.detenu_par!==moi.id&&new Date(v.vu_le).getTime()>Date.now()-600000){
     jeEdite=false;
-    tfBandeau('<b>Lecture seule</b> — '+v.detenu_nom+' modifie ce planning en ce moment. '+
-      '<button onclick="location.reload()">Réessayer</button>','warn');
-    return false;
-  }
-  const {error} = await sb.from('verrous').upsert({document_id:DOC_ID,detenu_par:moi.id,
+    tfBandeau('<b>Lecture seule</b> — '+v.detenu_nom+' modifie ce planning. '+
+      '<button onclick="location.reload()">Réessayer</button>','warn'); return false; }
+  const {error}=await sb.from('verrous').upsert({document_id:DOC_ID,detenu_par:moi.id,
     detenu_nom:profil.nom,pris_le:new Date().toISOString(),vu_le:new Date().toISOString()});
   if(error){ jeEdite=false; return false; }
   jeEdite=true;
-  minuterieVerrou=setInterval(async()=>{
-    await sb.from('verrous').update({vu_le:new Date().toISOString()})
-      .eq('document_id',DOC_ID).eq('detenu_par',moi.id); },60000);
+  minuterieVerrou=setInterval(async()=>{ await sb.from('verrous')
+    .update({vu_le:new Date().toISOString()})
+    .eq('document_id',DOC_ID).eq('detenu_par',moi.id); },60000);
   return true;
 }
 async function tfLacherVerrou(){
   if(minuterieVerrou) clearInterval(minuterieVerrou);
-  if(jeEdite && sb) await sb.from('verrous').delete()
+  if(jeEdite&&sb) await sb.from('verrous').delete()
     .eq('document_id',DOC_ID).eq('detenu_par',moi.id);
 }
 async function tfSauver(){
   if(!jeEdite) return;
   if(sauveEnCours){ sauveDemandee=true; return; }
   sauveEnCours=true;
-  const {error} = await sb.from('documents').update({contenu:D}).eq('id',DOC_ID);
+  const {error}=await sb.from('documents').update({contenu:D}).eq('id',DOC_ID);
   sauveEnCours=false;
-  if(error) tfBandeau("Enregistrement refusé : "+error.message,'err');
+  if(error) tfBandeau('Enregistrement refusé : '+error.message,'err');
   else tfEtat('Enregistré — '+new Date().toLocaleTimeString('fr-FR'));
   if(sauveDemandee){ sauveDemandee=false; tfSauver(); }
 }
@@ -189,153 +246,198 @@ function tfSauverPlusTard(){
   if(!jeEdite) return;
   if(minuterieSauve) clearTimeout(minuterieSauve);
   tfEtat('Modification en attente…');
-  minuterieSauve=setTimeout(tfSauver,1200);
+  minuterieSauve=setTimeout(tfSauver,1100);
 }
-window.addEventListener('pagehide', tfLacherVerrou);
+window.addEventListener('pagehide',tfLacherVerrou);
 
-// ---------- semaines ----------
-function lundiDe(d){
-  const x=new Date(d); const j=(x.getDay()+6)%7;
-  x.setDate(x.getDate()-j); x.setHours(12,0,0,0); return x;
-}
-function isoSemaine(d){
-  const x=lundiDe(d);
+function lundiDe(d){ const x=new Date(d); x.setDate(x.getDate()-((x.getDay()+6)%7));
+  x.setHours(12,0,0,0); return x; }
+function isoSem(d){ const x=lundiDe(d);
   return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+
-         String(x.getDate()).padStart(2,'0');
-}
-function numSemaine(d){
-  const x=new Date(d); x.setHours(0,0,0,0);
+         String(x.getDate()).padStart(2,'0'); }
+function numSem(d){ const x=new Date(d); x.setHours(0,0,0,0);
   x.setDate(x.getDate()+3-((x.getDay()+6)%7));
   const s=new Date(x.getFullYear(),0,4);
-  return 1+Math.round(((x-s)/86400000-3+((s.getDay()+6)%7))/7);
-}
-function joursDeLaSemaine(iso){
-  const l=new Date(iso+'T12:00:00'); const out=[];
-  for(let i=0;i<7;i++){ const d=new Date(l); d.setDate(l.getDate()+i); out.push(d); }
-  return out;
-}
-function libelleSemaine(iso){
-  const j=joursDeLaSemaine(iso); const a=j[0], b=j[6];
+  return 1+Math.round(((x-s)/86400000-3+((s.getDay()+6)%7))/7); }
+function joursSem(iso){ const l=new Date(iso+'T12:00:00'),o=[];
+  for(let i=0;i<8;i++){ const d=new Date(l); d.setDate(l.getDate()+i); o.push(d); } return o; }
+function libSem(iso){ const j=joursSem(iso);
   const f=d=>d.getDate()+' '+d.toLocaleDateString('fr-FR',{month:'long'});
-  return f(a)+' — '+f(b)+' '+b.getFullYear();
-}
-function sem(){
-  if(!D.semaines[semaineISO]) D.semaines[semaineISO]={matin:{},soir:{}};
-  return D.semaines[semaineISO];
-}
-function cell(zone, salon, jour){
+  return f(j[0])+' — '+f(j[7])+' '+j[7].getFullYear(); }
+
+function sem(){ if(!D.semaines[semaineISO]) D.semaines[semaineISO]={matin:{},soir:{}};
+  return D.semaines[semaineISO]; }
+function cel(z,sal,j){
   const s=sem();
-  if(!s[zone][salon]) s[zone][salon]={};
-  if(!s[zone][salon][jour]) s[zone][salon][jour]={n:'',p:'',d:'',h:''};
-  return s[zone][salon][jour];
+  if(!s[z][sal]) s[z][sal]={};
+  if(!s[z][sal][j]) s[z][sal][j]={n:'',p:'',d:'',h:'',f:0};
+  return s[z][sal][j];
 }
 
-// ---------- rendu ----------
-function champ(val, cls, ph, onIn){
-  const i=document.createElement('input');
-  i.className=cls||''; i.value=val||''; i.placeholder=ph||'';
-  i.addEventListener('input',()=>{ onIn(i.value); tfSauverPlusTard(); });
+function inp(v,cls,ph,cb){
+  const i=document.createElement('input'); i.className=cls; i.value=v||''; i.placeholder=ph||'';
+  i.addEventListener('input',()=>{ cb(i.value); tfSauverPlusTard(); majTotaux(); });
   return i;
 }
-function tableau(zone, salons){
-  const jours=joursDeLaSemaine(semaineISO);
+function estMasque(z,liste,idx,j){
+  for(let k=0;k<idx;k++){
+    const c=cel(z,liste[k],j);
+    if(c.f>0 && k+c.f>=idx) return true;
+  }
+  return false;
+}
+function tableau(z,liste,titre,classe){
+  const jours=joursSem(semaineISO);
+  const box=document.createElement('div');
+  const h=document.createElement('div'); h.className='zt'+(classe?' '+classe:'');
+  h.textContent=titre; box.appendChild(h);
+
   const t=document.createElement('table');
-  const th=document.createElement('thead');
-  const tr=document.createElement('tr');
-  const c0=document.createElement('th'); c0.textContent='Salons'; c0.style.width='132px';
+  const th=document.createElement('thead'); const tr=document.createElement('tr');
+  const c0=document.createElement('th'); c0.className='cs'; c0.textContent='Salons';
   tr.appendChild(c0);
   jours.forEach((d,i)=>{
-    const th2=document.createElement('th'); th2.className='j';
-    th2.innerHTML=JOURS[i]+'<small>'+d.getDate()+'/'+String(d.getMonth()+1).padStart(2,'0')+'</small>';
-    tr.appendChild(th2);
+    const x=document.createElement('th');
+    if(i===7) x.className='suiv';
+    x.innerHTML='<div class="jn">'+JOURS[i]+'</div><div class="jd">'+
+      d.getDate()+'/'+String(d.getMonth()+1).padStart(2,'0')+'</div>';
+    tr.appendChild(x);
   });
   th.appendChild(tr); t.appendChild(th);
 
   const tb=document.createElement('tbody');
-  salons.forEach(sal=>{
+  liste.forEach((sal,idx)=>{
     const l=document.createElement('tr');
-    const td0=document.createElement('td');
-    td0.className='sal'+(FUSIONS.includes(sal)?' fus':'');
-    td0.textContent=sal; l.appendChild(td0);
-    jours.forEach((d,i)=>{
+    const td0=document.createElement('td'); td0.className='sal'; td0.textContent=sal;
+    l.appendChild(td0);
+    jours.forEach((d,j)=>{
+      if(estMasque(z,liste,idx,j)) return;
+      const c=cel(z,sal,j);
       const td=document.createElement('td');
-      const c=cell(zone,sal,i);
-      const box=document.createElement('div'); box.className='cel';
-      box.appendChild(champ(c.n,'','Groupe',v=>c.n=v));
-      box.appendChild(champ(c.p,'nb','',v=>c.p=v));
-      box.appendChild(champ(c.d,'dis','Dispo',v=>c.d=v));
-      td.appendChild(box);
-      td.appendChild(champ(c.h,'hor','Horaires',v=>c.h=v));
+      td.className='jour'+(c.n?' rempli':'')+(c.f>0?' fus':'');
+      if(c.f>0) td.rowSpan=c.f+1;
+      const k=document.createElement('div'); k.className='k';
+      const r1=document.createElement('div'); r1.className='r1';
+      r1.appendChild(inp(c.n,'cli','',v=>{c.n=v; td.classList.toggle('rempli',!!v);}));
+      r1.appendChild(inp(c.p,'nb','',v=>c.p=v));
+      r1.appendChild(inp(c.d,'dis','',v=>c.d=v));
+      k.appendChild(r1);
+      k.appendChild(inp(c.h,'hor','',v=>c.h=v));
+      td.appendChild(k);
+      if(FUSIONNABLES[sal] && idx+1<liste.length){
+        const b=document.createElement('button');
+        b.className='fus-btn'+(c.f>0?' on':'');
+        b.textContent = c.f>0 ? '\u21F1' : '\u21F2';
+        b.title = c.f>0 ? 'Séparer les salons' : 'Réunir avec le salon suivant';
+        b.onclick=(e)=>{ e.stopPropagation();
+          if(c.f>0){ c.f=0; render(); tfSauverPlusTard(); }
+          else ouvrirFusion(z,liste,idx,j); };
+        td.appendChild(b);
+      }
       l.appendChild(td);
     });
     tb.appendChild(l);
   });
-  // totaux
-  const tt=document.createElement('tr'); tt.className='tot';
+  const tt=document.createElement('tr'); tt.className='total';
   const t0=document.createElement('td'); t0.className='sal'; t0.textContent='Total';
   tt.appendChild(t0);
-  joursDeLaSemaine(semaineISO).forEach((d,i)=>{
-    const td=document.createElement('td');
-    let n=0; salons.forEach(s=>{ const v=parseInt(cell(zone,s,i).p); if(!isNaN(v)) n+=v; });
-    td.textContent = n||''; td.id='tot-'+zone+'-'+i;
-    tt.appendChild(td);
-  });
+  jours.forEach((d,j)=>{ const td=document.createElement('td');
+    td.id='tot-'+z+'-'+j; tt.appendChild(td); });
   tb.appendChild(tt);
-  t.appendChild(tb);
-  return t;
-}
-function render(){
-  document.getElementById('sem').innerHTML =
-    libelleSemaine(semaineISO)+'<small>Semaine '+numSemaine(new Date(semaineISO+'T12:00:00'))+'</small>';
-  const m=document.getElementById('zones'); m.innerHTML='';
-  [['matin','Occupation salons — Matin',SALONS_MATIN],
-   ['soir','Occupation salons — Soir',SALONS_SOIR]].forEach(([z,titre,liste])=>{
-    const d=document.createElement('div'); d.className='zone';
-    const h=document.createElement('div'); h.className='zt'; h.textContent=titre;
-    d.appendChild(h); d.appendChild(tableau(z,liste)); m.appendChild(d);
+  const w=document.createElement('tr'); w.className='wtc';
+  const w0=document.createElement('td'); w0.className='sal'; w0.textContent='WTC';
+  w.appendChild(w0);
+  jours.forEach((d,j)=>{
+    const c=cel(z,'__WTC__',j);
+    const td=document.createElement('td');
+    const k=document.createElement('div'); k.className='k';
+    const r1=document.createElement('div'); r1.className='r1';
+    r1.appendChild(inp(c.n,'cli','',v=>c.n=v));
+    r1.appendChild(inp(c.p,'nb','',v=>c.p=v));
+    r1.appendChild(inp(c.d,'dis','',v=>c.d=v));
+    k.appendChild(r1);
+    td.appendChild(k); w.appendChild(td);
   });
-  // recalcul des totaux à la volée
-  document.querySelectorAll('.cel .nb').forEach(i=>
-    i.addEventListener('input',majTotaux));
+  tb.appendChild(w);
+  t.appendChild(tb); box.appendChild(t);
+  return box;
 }
+function ouvrirFusion(z,liste,idx,j){
+  fusCible={z:z,liste:liste,idx:idx,j:j};
+  const possibles=FUSIONNABLES[liste[idx]]||[];
+  const zone=document.getElementById('mfopts'); zone.innerHTML='';
+  document.getElementById('mftitre').textContent='Réunir '+liste[idx];
+  let n=0;
+  possibles.forEach((nom,i)=>{
+    const suite=liste.slice(idx+1, idx+2+i);
+    if(suite[suite.length-1]!==nom) return;
+    n++;
+    const lab=document.createElement('label');
+    const r=document.createElement('input'); r.type='radio'; r.name='fus'; r.value=i+1;
+    if(n===1) r.checked=true;
+    lab.appendChild(r);
+    lab.appendChild(document.createTextNode(liste[idx]+' + '+suite.join(' + ')));
+    zone.appendChild(lab);
+  });
+  if(!n){ zone.innerHTML='<p style="font-size:11.5px;color:#7A7266">'+
+    'Aucune fusion possible pour ce salon.</p>'; }
+  document.getElementById('mf').classList.add('on');
+}
+function validerFusion(){
+  const r=document.querySelector('#mfopts input:checked');
+  if(r && fusCible){
+    cel(fusCible.z, fusCible.liste[fusCible.idx], fusCible.j).f = parseInt(r.value);
+    render(); tfSauverPlusTard();
+  }
+  fermerFusion();
+}
+function fermerFusion(){ document.getElementById('mf').classList.remove('on'); fusCible=null; }
+
 function majTotaux(){
-  [['matin',SALONS_MATIN],['soir',SALONS_SOIR]].forEach(([z,liste])=>{
-    for(let i=0;i<7;i++){
-      let n=0; liste.forEach(s=>{ const v=parseInt(cell(z,s,i).p); if(!isNaN(v)) n+=v; });
-      const c=document.getElementById('tot-'+z+'-'+i);
+  [['matin',MATIN],['soir',SOIR]].forEach(([z,liste])=>{
+    for(let j=0;j<8;j++){
+      let n=0;
+      liste.forEach(s=>{ const v=parseInt(cel(z,s,j).p); if(!isNaN(v)) n+=v; });
+      const w=parseInt(cel(z,'__WTC__',j).p); if(!isNaN(w)) n+=w;
+      const c=document.getElementById('tot-'+z+'-'+j);
       if(c) c.textContent=n||'';
     }
   });
 }
-function allerA(delta){
-  const d=new Date(semaineISO+'T12:00:00');
-  d.setDate(d.getDate()+delta*7);
-  semaineISO=isoSemaine(d); render();
+function render(){
+  document.getElementById('sem').innerHTML=libSem(semaineISO)+
+    '<small>Semaine '+numSem(new Date(semaineISO+'T12:00:00'))+'</small>';
+  const m=document.getElementById('feuille'); m.innerHTML='';
+  m.appendChild(tableau('matin',MATIN,'Occupation des salons — Matin'));
+  m.appendChild(tableau('soir',SOIR,'Occupation des salons — Soir','soir'));
+  majTotaux();
 }
-function aujourdhui(){ semaineISO=isoSemaine(new Date()); render(); }
+function allerA(n){ const d=new Date(semaineISO+'T12:00:00');
+  d.setDate(d.getDate()+n*7); semaineISO=isoSem(d); render(); }
 
-// ---------- démarrage ----------
 async function tfInit(){
   if(!await tfDemarrer()) return;
   document.getElementById('tfqui').textContent=profil.nom;
-  const {data:doc,error} = await sb.from('documents')
+  const {data:doc,error}=await sb.from('documents')
     .select('contenu,maj_le,maj_par_nom').eq('id',DOC_ID).single();
   if(error){ tfBandeau('Lecture impossible : '+error.message,'err'); return; }
-  if(doc.contenu && doc.contenu.semaines) D=doc.contenu;
-  const peut = !!ECRITURE[profil.role];
+  if(doc.contenu&&doc.contenu.semaines) D=doc.contenu;
+  const peut=!!ECRITURE[profil.role];
   if(peut) await tfPrendreVerrou();
   else { jeEdite=false;
     tfBandeau('<b>Lecture seule</b> — votre fonction ne permet pas de modifier ce planning.','info'); }
   if(!jeEdite) document.body.classList.add('tf-lecture');
-  if(doc.maj_par_nom) tfEtat('Dernière modification : '+doc.maj_par_nom+
-    ' le '+new Date(doc.maj_le).toLocaleString('fr-FR'));
-  semaineISO=isoSemaine(new Date());
+  if(doc.maj_par_nom) tfEtat('Dernière modification : '+doc.maj_par_nom+' le '+
+    new Date(doc.maj_le).toLocaleString('fr-FR'));
+  semaineISO=isoSem(new Date());
   render();
   document.getElementById('prec').onclick=()=>allerA(-1);
   document.getElementById('suiv').onclick=()=>allerA(1);
-  document.getElementById('auj').onclick=aujourdhui;
+  document.getElementById('auj').onclick=()=>{ semaineISO=isoSem(new Date()); render(); };
   document.getElementById('imp').onclick=()=>window.print();
+  document.getElementById('mfan').onclick=fermerFusion;
+  document.getElementById('mfok').onclick=validerFusion;
 }
-window.addEventListener('DOMContentLoaded', tfInit);
+window.addEventListener('DOMContentLoaded',tfInit);
 </script>
 </body></html>
