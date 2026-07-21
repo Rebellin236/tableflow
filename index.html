@@ -94,6 +94,48 @@ footer{text-align:center;font-size:9.5px;letter-spacing:.1em;text-transform:uppe
 .mrow .an{background:none;border:1px solid #E8DFC9;color:#7A7266}
 .mrow .ok{background:#1F1B16;color:#fff}
 .mrow .ok:hover{background:#B8922A}
+#outils{display:none;align-items:center;gap:14px;margin:26px 0 0;padding:14px 18px;
+  background:#fff;border:1px solid #E8DFC9;border-radius:10px}
+#outils button{font:inherit;font-size:11.5px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:9px 16px;border-radius:7px;cursor:pointer;
+  background:#1F1B16;color:#fff;border:1px solid #1F1B16}
+#outils button:hover{background:#B8922A;border-color:#B8922A}
+#outils .oi{font-size:11px;color:#7A7266}
+#modifs{margin:26px 0 0;background:#fff;border:1px solid #E8DFC9;border-radius:10px;
+  padding:16px 18px}
+#modifs h3{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;font-weight:600;margin-bottom:10px;color:#1F1B16}
+.ml{display:flex;align-items:center;gap:12px;padding:6px 0;
+  border-bottom:1px solid #F0EBE0;font-size:12px}
+.ml:last-child{border-bottom:none}
+.ml .md{font-weight:700;width:190px;color:#1F1B16}
+.ml .mq{color:#B8922A;font-weight:600;width:170px}
+.ml .mt{color:#7A7266;flex:1}
+.ml .mh{font:inherit;font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  font-weight:700;padding:4px 10px;border:1px solid #E8DFC9;background:none;
+  border-radius:6px;cursor:pointer;color:#7A7266}
+.ml .mh:hover{border-color:#B8922A;color:#B8922A}
+#hmodal{display:none;position:fixed;inset:0;background:rgba(31,27,22,.45);
+  z-index:120;align-items:center;justify-content:center;padding:24px}
+#hmodal.on{display:flex}
+.hbox{background:#fff;border-radius:12px;padding:24px 26px;width:100%;
+  max-width:480px;max-height:80vh;display:flex;flex-direction:column}
+.hbox h3{font-family:'Cinzel',serif;font-size:13px;letter-spacing:.12em;
+  text-transform:uppercase;font-weight:600;margin-bottom:12px}
+#hListe{overflow-y:auto;flex:1}
+.hl{display:flex;align-items:center;gap:10px;padding:7px 2px;
+  border-bottom:1px solid #F0EBE0;font-size:12px}
+.hl .hq{font-weight:700;color:#B8922A;width:150px}
+.hl .ht{color:#7A7266;flex:1}
+.hl .hr{font:inherit;font-size:10px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;padding:4px 10px;border:1px solid #E8DFC9;
+  background:none;border-radius:6px;cursor:pointer;color:#7A7266}
+.hl .hr:hover{border-color:#1E5878;color:#1E5878}
+.hv{font-size:12px;color:#7A7266;padding:14px 2px;line-height:1.5}
+.hf{font:inherit;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:9px;border:1px solid #E8DFC9;background:none;
+  border-radius:7px;cursor:pointer;color:#7A7266;margin-top:14px}
+.hf:hover{border-color:#B8922A;color:#B8922A}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head><body>
@@ -128,6 +170,11 @@ footer{text-align:center;font-size:9.5px;letter-spacing:.1em;text-transform:uppe
     <div class="bienv">Bonjour <b id="bienvNom"></b></div>
     <div class="intro">Vos modules F&amp;B. Les accès dépendent de votre fonction.</div>
     <div class="grille" id="grille"></div>
+    <div id="outils" style="display:none">
+      <button id="btSauve" onclick="sauvegarderTout()">Télécharger une sauvegarde</button>
+      <span class="oi">Fichier JSON contenant tous les documents — à conserver précieusement.</span>
+    </div>
+    <div id="modifs"></div>
   </main>
   <footer>Mercure Marseille Centre Vieux-Port · 1 rue Neuve Saint-Martin, 13001 Marseille</footer>
 </div>
@@ -148,6 +195,13 @@ footer{text-align:center;font-size:9.5px;letter-spacing:.1em;text-transform:uppe
   </div>
 </div>
 
+<div id="hmodal">
+  <div class="hbox">
+    <h3 id="hTitre">Historique</h3>
+    <div id="hListe"></div>
+    <button class="hf" onclick="fermerHistorique()">Fermer</button>
+  </div>
+</div>
 <script>
 // ---------- CONFIGURATION SUPABASE ----------
 // Remplacer ces deux valeurs par celles de votre projet
@@ -270,6 +324,86 @@ function afficherApp(){
   });
   if(!n) g.innerHTML='<div class="vide">Aucun module ne vous est attribué.<br>'+
     "Contactez Antoine Forster pour l'ouverture de vos accès.</div>";
+  chargerModifs();
+  $('outils').style.display = profil.role==='admin' ? 'flex' : 'none';
+}
+
+// ---------- SUIVI DES MODIFICATIONS ----------
+const LIB_DOC = {
+  carte_bar:'Carte du bar', menu_assis:'Menus assis', menu_buffet:'Buffets & cocktails',
+  room_mshop:'Room — MShop', room_food:'Room — Nourriture', room_wine:'Room — Vins',
+  room_drinks:'Room — Boissons', planning_staff:'Planning personnel',
+  activite_resto:'Activité restauration', planning_salons:'Planning salons'};
+
+async function chargerModifs(){
+  const {data,error} = await sb.from('documents')
+    .select('id,maj_le,maj_par_nom').order('maj_le',{ascending:false});
+  const z=$('modifs'); if(error||!data){ z.innerHTML=''; return; }
+  z.innerHTML='<h3>Dernières modifications</h3>';
+  data.forEach(d=>{
+    if(!d.maj_par_nom) return;
+    const l=document.createElement('div'); l.className='ml';
+    l.innerHTML='<span class="md">'+(LIB_DOC[d.id]||d.id)+'</span>'+
+      '<span class="mq">'+d.maj_par_nom+'</span>'+
+      '<span class="mt">'+new Date(d.maj_le).toLocaleString('fr-FR',
+        {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</span>'+
+      '<button class="mh" onclick="ouvrirHistorique(\''+d.id+'\')">Historique</button>';
+    z.appendChild(l);
+  });
+}
+
+// ---------- HISTORIQUE ----------
+async function ouvrirHistorique(docId){
+  $('hTitre').textContent='Historique — '+(LIB_DOC[docId]||docId);
+  $('hListe').innerHTML='<div class="hv">Chargement…</div>';
+  $('hmodal').classList.add('on');
+  const {data,error} = await sb.from('historique')
+    .select('id,modifie_par_nom,modifie_le,archive_le')
+    .eq('document_id',docId).order('archive_le',{ascending:false}).limit(60);
+  const z=$('hListe'); z.innerHTML='';
+  if(error){ z.innerHTML='<div class="hv">Historique indisponible : '+error.message+
+    '<br>Le script « 5 — Historique » a-t-il été lancé ?</div>'; return; }
+  if(!data.length){ z.innerHTML='<div class="hv">Aucune version archivée pour ce document.'+
+    '<br>Les versions apparaîtront ici à chaque modification.</div>'; return; }
+  data.forEach(v=>{
+    const l=document.createElement('div'); l.className='hl';
+    l.innerHTML='<span class="hq">'+(v.modifie_par_nom||'—')+'</span>'+
+      '<span class="ht">'+new Date(v.archive_le).toLocaleString('fr-FR')+'</span>';
+    if(profil.role==='admin'){
+      const b=document.createElement('button'); b.className='hr';
+      b.textContent='Restaurer';
+      b.onclick=()=>restaurer(docId, v.id, v.archive_le);
+      l.appendChild(b);
+    }
+    $('hListe').appendChild(l);
+  });
+}
+async function restaurer(docId, versionId, dateV){
+  if(!confirm('Restaurer la version du '+new Date(dateV).toLocaleString('fr-FR')+
+    ' ?\n\nLa version actuelle sera archivée avant remplacement.')) return;
+  const {data:v,error:e1} = await sb.from('historique')
+    .select('contenu').eq('id',versionId).single();
+  if(e1||!v){ alert('Lecture de la version impossible.'); return; }
+  const {error:e2} = await sb.from('documents')
+    .update({contenu:v.contenu}).eq('id',docId);
+  if(e2){ alert('Restauration refusée : '+e2.message); return; }
+  fermerHistorique(); chargerModifs();
+  alert('Version restaurée. Rouvrez le module pour voir le contenu.');
+}
+function fermerHistorique(){ $('hmodal').classList.remove('on'); }
+
+// ---------- SAUVEGARDE ----------
+async function sauvegarderTout(){
+  const b=$('btSauve'); b.disabled=true; b.textContent='Préparation…';
+  const {data,error} = await sb.from('documents').select('id,libelle,module,contenu,maj_le,maj_par_nom');
+  b.disabled=false; b.textContent='Télécharger une sauvegarde';
+  if(error||!data){ alert('Export impossible : '+(error?error.message:'')); return; }
+  const paquet={exporte_le:new Date().toISOString(), par:profil.nom, documents:data};
+  const blob=new Blob([JSON.stringify(paquet,null,1)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='tableflow_sauvegarde_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); URL.revokeObjectURL(a.href);
 }
 
 // ---------- MOT DE PASSE ----------
