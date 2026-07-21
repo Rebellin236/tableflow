@@ -1,0 +1,2378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planning Restauration</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap');
+
+  :root {
+    --bg: #edf0f5;
+    --white: #ffffff;
+    --border: #c2c8d4;
+    --border-dark: #8a95a8;
+    --text: #1a1e2a;
+    --text2: #4a5263;
+    --text3: #8891a0;
+    --header-bg: #253161;
+    --header-text: #ffffff;
+    --sans: 'Barlow', sans-serif;
+    --cond: 'Barlow Condensed', sans-serif;
+  }
+
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:var(--sans); background:var(--bg); color:var(--text); font-size:13px; }
+
+  /* HEADER */
+  .app-header {
+    background:var(--header-bg); color:#fff;
+    padding:10px 20px; display:flex; align-items:center; gap:14px;
+    position:sticky; top:0; z-index:100;
+    box-shadow:0 2px 10px rgba(0,0,0,0.25);
+  }
+  .app-title { font-family:var(--cond); font-size:19px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+  .week-nav { display:flex; align-items:center; gap:8px; margin-left:auto; }
+  .week-label { font-family:var(--cond); font-size:14px; font-weight:600; color:#ffd54f; min-width:270px; text-align:center; }
+  .btn-nav { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; width:30px; height:30px; border-radius:4px; cursor:pointer; font-size:17px; display:flex; align-items:center; justify-content:center; transition:.15s; }
+  .btn-nav:hover { background:rgba(255,255,255,0.3); }
+  .btn-save { background:#ffd54f; border:none; color:#1a1e2a; padding:7px 16px; border-radius:4px; cursor:pointer; font-family:var(--sans); font-size:12px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; transition:.15s; }
+  .btn-save:hover { background:#ffca00; }
+
+  /* STATS */
+  .stats-bar { background:#e1e6ef; border-bottom:2px solid var(--border-dark); padding:4px 16px; display:flex; gap:24px; font-size:12px; color:var(--text2); font-weight:600; }
+  .stats-bar span b { color:var(--header-bg); }
+
+  /* LEGEND */
+  .legend { display:flex; gap:10px; padding:4px 12px; flex-wrap:wrap; background:#fff; border-bottom:1px solid var(--border); font-size:11px; font-weight:600; }
+  .legend-item { display:flex; align-items:center; gap:5px; color:var(--text2); }
+  .legend-dot { width:16px; height:12px; border-radius:2px; }
+
+  /* MAIN */
+  .main { padding:8px 12px; }
+  .team-section { margin-bottom:10px; }
+  .team-header-row { background:var(--header-bg); color:#fff; font-family:var(--cond); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:3px 8px; border-radius:4px 4px 0 0; }
+
+  /* TABLE */
+  .planning-table { width:100%; border-collapse:collapse; background:var(--white); border:2px solid var(--border-dark); border-top:none; table-layout:fixed; }
+  .planning-table th {
+    background:#dce3ec; padding:6px 4px; font-family:var(--cond); font-size:12px; font-weight:700;
+    text-align:center; border:1px solid var(--border); color:var(--text); white-space:nowrap;
+    text-transform:uppercase; letter-spacing:.5px;
+  }
+  .planning-table th.today-col { background:#ddeeff; border-bottom:3px solid #4a7adf; color:#1a40a0; }
+  .planning-table th.ferie-col { background:#fff0d0; border-bottom:2px solid #c8880a; color:#7a4a00; }
+  .planning-table th.ferie-col .day-name-th { color:#7a4a00; }
+  .planning-table th.ferie-col .day-date-th { color:#b06000; }
+  .planning-table th.ferie-col::after { content:'🏛'; display:block; font-size:9px; line-height:1; margin-top:1px; }
+  .planning-table th.today-ferie { background:#ddeeff; border-bottom:3px solid #4a7adf; color:#1a40a0; }
+  .planning-table th.today-ferie::after { content:'🏛 J.Férié'; display:block; font-size:8px; line-height:1; margin-top:1px; color:#4a7adf; font-weight:700; }
+  .today-col .day-date-th, .today-ferie .day-date-th { color:#2a5abf; }
+  .col-name  { width:128px; text-align:left !important; padding-left:6px !important; }
+  .col-day   { width:104px; }
+  .col-total { width:50px; background:#eff2ff !important; color:#253161 !important; }
+  .day-name-th { display:block; font-size:11px; }
+  .day-date-th { display:block; font-size:10px; font-weight:500; color:var(--text2); }
+
+  /* ROWS */
+  tr.emp-row:hover td { filter:brightness(.97); }
+  .planning-table td { border:1px solid var(--border); vertical-align:top; padding:0; }
+
+  /* Name cell */
+  .name-cell { padding:4px 6px; background:#f5f7fb; border-right:2px solid var(--border-dark); vertical-align:middle !important; cursor:grab; }
+  .name-cell:active { cursor:grabbing; }
+  .name-cell.emp-drag-over { background:#ddeeff !important; outline:2px dashed #4a7adf; }
+  .emp-first { font-size:10px; color:var(--text2); }
+  .emp-last  { font-size:12px; font-weight:700; line-height:1.1; }
+  .emp-post  { font-size:9px; color:var(--text3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .btn-dup {
+    display:block; width:100%; margin-top:3px;
+    background:rgba(37,49,97,0.08); border:1px solid rgba(37,49,97,0.2);
+    color:#253161; border-radius:3px; cursor:pointer;
+    font-size:9px; font-weight:700; padding:2px 4px;
+    text-align:center; transition:all .15s; white-space:nowrap;
+    font-family:var(--sans); letter-spacing:.3px;
+  }
+  .btn-dup:hover { background:#253161; color:#fff; }
+
+  /* Section management */
+  .team-header-row {
+    background:var(--header-bg); color:#fff; font-family:var(--cond); font-size:11px;
+    font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:3px 8px;
+    border-radius:4px 4px 0 0; display:flex; align-items:center; gap:6px;
+  }
+  .team-name-label { flex:1; }
+  .btn-team-action {
+    background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3);
+    color:#fff; border-radius:3px; cursor:pointer; font-size:10px; padding:2px 6px;
+    font-family:var(--sans); font-weight:700; transition:.15s; white-space:nowrap;
+  }
+  .btn-team-action:hover { background:rgba(255,255,255,0.3); }
+  .btn-team-del { background:rgba(220,50,50,0.3); border-color:rgba(220,50,50,0.5); }
+  .btn-team-del:hover { background:rgba(220,50,50,0.6); }
+
+  /* Add employee / add section buttons */
+  .btn-add-emp {
+    display:block; width:100%; background:rgba(37,49,97,0.05); border:1px dashed #8a95a8;
+    border-radius:3px; cursor:pointer; font-size:10px; color:#253161; font-weight:700;
+    padding:4px; text-align:center; font-family:var(--sans);
+  }
+  .btn-add-emp:hover { background:#253161; color:#fff; border-style:solid; }
+  .btn-del-emp {
+    float:right; background:none; border:none; cursor:pointer;
+    color:#d05050; font-size:11px; padding:0 2px; line-height:1;
+  }
+  .btn-del-emp:hover { color:#a00; }
+  .btn-add-section {
+    display:block; margin:8px 0; padding:6px 14px; background:#253161; color:#fff;
+    border:none; border-radius:4px; cursor:pointer; font-size:12px; font-weight:700;
+    font-family:var(--sans); text-align:center;
+  }
+  .btn-add-section:hover { background:#1a2450; }
+
+  /* Total cell */
+  .total-cell { text-align:center; background:#eef1fc; border-left:2px solid var(--border-dark); vertical-align:middle !important; padding:3px; }
+  .total-hrs  { font-family:var(--cond); font-size:17px; font-weight:700; color:#253161; display:block; line-height:1; }
+  .total-lbl  { font-size:8px; color:var(--text3); text-transform:uppercase; letter-spacing:.8px; }
+
+  /* SHIFT CELL */
+  .shift-cell { cursor:pointer; height:52px; position:relative; transition:filter .1s; background:#fff; }
+  .shift-cell:hover { filter:brightness(.93) !important; }
+  .shift-cell.empty-cell:hover .plus-hint { opacity:1; }
+  .plus-hint { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; color:#b8c2d0; opacity:0; transition:opacity .15s; }
+
+  /* RH Alert icon on shift cell */
+  .rh-badge {
+    position:absolute; top:2px; right:3px;
+    font-size:11px; line-height:1; z-index:10;
+    cursor:help;
+  }
+  /* RH Tooltip on shift cell */
+  .rh-tip {
+    display:none; position:absolute; bottom:calc(100% + 6px); right:0;
+    background:#1a1e2a; color:#fff; font-size:11px; font-weight:500; line-height:1.6;
+    padding:8px 11px; border-radius:6px; z-index:400;
+    box-shadow:0 4px 20px rgba(0,0,0,0.35); pointer-events:none;
+    min-width:200px; max-width:290px; white-space:normal;
+  }
+  .rh-tip::after {
+    content:''; position:absolute; top:100%; right:10px;
+    border:6px solid transparent; border-top-color:#1a1e2a;
+  }
+  .shift-cell:hover .rh-tip { display:block; }
+
+  /* Drag & Drop */
+  .shift-cell[draggable="true"] { cursor:grab; }
+  .shift-cell.dragging { opacity:0.4; }
+  .shift-cell.drag-over {
+    outline:2px dashed #253161;
+    background:rgba(37,49,97,0.08) !important;
+  }
+
+  /* Shift inner layout */
+  .shift-inner { height:100%; display:flex; flex-direction:column; padding:3px 5px 2px; }
+  .shift-time-main { font-family:var(--cond); font-size:12px; font-weight:700; line-height:1.15; color:inherit; }
+  .shift-mission { font-size:9px; font-weight:700; text-align:center; flex:1; display:flex; align-items:center; justify-content:center; text-transform:uppercase; letter-spacing:.4px; line-height:1.2; word-break:break-word; color:inherit; opacity:.85; }
+  .shift-footer { display:flex; justify-content:space-between; align-items:flex-end; }
+  .shift-code-sm { font-family:var(--cond); font-size:9px; font-weight:600; opacity:.6; }
+  .shift-hrs-sm  { font-family:var(--cond); font-size:10px; font-weight:700; opacity:.8; }
+
+  /* DROPDOWN */
+  .dd-overlay { position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.18); }
+  .dd-popup {
+    position:fixed; background:#fff; border:1px solid var(--border-dark); border-radius:8px;
+    width:340px; max-height:520px; box-shadow:0 16px 48px rgba(0,0,0,0.22);
+    display:flex; flex-direction:column; overflow:hidden; z-index:201;
+    animation:popIn .12s ease-out;
+  }
+  @keyframes popIn { from{opacity:0;transform:scale(.96) translateY(-4px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+  .dd-header { padding:12px 14px 10px; border-bottom:2px solid var(--border); background:#f5f7fb; }
+  .dd-context { font-size:11px; color:var(--text2); margin-bottom:8px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+  .dd-context b { color:var(--header-bg); }
+  .dd-search { width:100%; background:#fff; border:2px solid var(--border-dark); border-radius:5px; padding:7px 10px; color:var(--text); font-family:var(--sans); font-size:13px; outline:none; transition:border-color .15s; }
+  .dd-search:focus { border-color:var(--header-bg); }
+  .dd-search::placeholder { color:var(--text3); }
+
+  .dd-mission-row { margin-top:8px; display:flex; gap:6px; align-items:center; }
+  .dd-mission-lbl { font-size:10px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+  .dd-mission-inp { flex:1; background:#fff; border:1px solid var(--border-dark); border-radius:4px; padding:5px 8px; font-family:var(--sans); font-size:12px; color:var(--text); outline:none; }
+  .dd-mission-inp:focus { border-color:var(--header-bg); }
+  .dd-mission-inp::placeholder { color:var(--text3); }
+
+  .dd-actions { display:flex; gap:6px; margin-top:8px; }
+  .btn-apply { flex:1; background:var(--header-bg); color:#fff; border:none; padding:7px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+  .btn-apply:hover { background:#1e2e55; }
+  .btn-clear-dd { background:#fff; border:1px solid #d05050; color:#d05050; padding:7px 10px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:700; }
+  .btn-clear-dd:hover { background:#fff0f0; }
+
+  .dd-body { overflow-y:auto; flex:1; padding:4px; }
+  .dd-body::-webkit-scrollbar { width:4px; }
+  .dd-body::-webkit-scrollbar-thumb { background:var(--border-dark); border-radius:2px; }
+
+  .dd-group-lbl { font-family:var(--cond); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--text3); padding:8px 8px 3px; font-weight:700; }
+  .dd-item { display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:5px; cursor:pointer; transition:background .1s; }
+  .dd-item:hover { background:#f0f4ff; }
+  .dd-item.active { background:#e0eaff; outline:2px solid #4a7adf; outline-offset:-2px; }
+  .item-swatch { width:12px; height:30px; border-radius:2px; flex-shrink:0; }
+  .item-code { font-family:var(--cond); font-size:13px; font-weight:700; min-width:54px; color:var(--text); }
+  .item-time { font-size:11px; color:var(--text2); flex:1; line-height:1.3; }
+  .item-hrs  { font-family:var(--cond); font-size:11px; color:var(--text3); font-weight:600; }
+
+  /* Week-apply button (absences only) */
+  .dd-week-row { margin-top:8px; display:none; }
+  .dd-week-row.visible { display:block; }
+  .btn-week-apply {
+    width:100%; background:linear-gradient(135deg,#d05050,#b03030);
+    color:#fff; border:none; padding:8px; border-radius:5px; cursor:pointer;
+    font-family:var(--sans); font-size:12px; font-weight:700; letter-spacing:.4px;
+    text-align:left; display:flex; align-items:center; gap:8px;
+    transition:filter .15s;
+  }
+  .btn-week-apply:hover { filter:brightness(1.1); }
+  .btn-week-apply .wk-icon { font-size:15px; }
+  .btn-week-apply .wk-desc { font-size:10px; opacity:.85; font-weight:500; }
+
+  /* Period selector row */
+  .dd-period-row { margin-top:8px; display:none; }
+  .dd-period-row.visible { display:block; }
+  .dd-period-title { font-size:10px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+  .dd-period-dates { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+  .dd-period-dates label { font-size:10px; color:var(--text2); font-weight:600; white-space:nowrap; }
+  .dd-period-input { flex:1; background:#fff; border:1px solid var(--border-dark); border-radius:4px; padding:5px 6px; font-family:var(--sans); font-size:12px; color:var(--text); outline:none; }
+  .dd-period-input:focus { border-color:var(--header-bg); }
+  .btn-period-apply {
+    width:100%; background:linear-gradient(135deg,#2a7a4a,#1a5a34);
+    color:#fff; border:none; padding:7px 8px; border-radius:5px; cursor:pointer;
+    font-family:var(--sans); font-size:12px; font-weight:700; letter-spacing:.4px;
+    display:flex; align-items:center; gap:8px; transition:filter .15s;
+  }
+  .btn-period-apply:hover { filter:brightness(1.15); }
+  .btn-period-apply .wk-icon { font-size:14px; }
+  .btn-period-apply .wk-desc { font-size:10px; opacity:.85; font-weight:500; }
+
+  /* Total cell — make it pop */
+  .total-cell { text-align:center; background:#e8eeff; border-left:2px solid #8099cc; vertical-align:middle !important; padding:4px; }
+  .total-hrs  { font-family:var(--cond); font-size:22px; font-weight:700; color:#253161; display:block; line-height:1; }
+  .total-lbl  { font-size:9px; color:#6070a0; text-transform:uppercase; letter-spacing:.8px; font-weight:600; }
+  .total-cell.zero { background:#f5f7fb; }
+  .total-cell.zero .total-hrs { color:#c0c8d8; font-size:18px; }
+
+  /* Toast */
+  .toast { position:fixed; bottom:20px; right:20px; background:var(--header-bg); color:#fff; padding:10px 18px; border-radius:6px; font-size:13px; font-weight:600; z-index:999; animation:slideIn .2s ease-out; box-shadow:0 4px 16px rgba(0,0,0,.2); }
+  @keyframes slideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  /* TABS */
+  .tabs { display:flex; gap:0; background:#1c2850; padding:0 16px; overflow-x:auto; }
+  .tabs::-webkit-scrollbar { height:3px; }
+  .tabs::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2); }
+  .tab { padding:8px 18px; cursor:pointer; font-family:var(--cond); font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:rgba(255,255,255,0.55); border-bottom:3px solid transparent; transition:all .15s; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+  .tab:hover { color:rgba(255,255,255,0.85); }
+  .tab.active { color:#ffd54f; border-bottom:3px solid #ffd54f; }
+  .tab-close { font-size:11px; opacity:.6; margin-left:2px; }
+  .tab-close:hover { opacity:1; color:#f88; }
+  .tab-add { padding:8px 14px; cursor:pointer; color:rgba(255,255,255,0.6); font-size:18px; line-height:1; border:none; background:none; transition:.15s; }
+  .tab-add:hover { color:#ffd54f; }
+
+  /* MODAL CRÉER PLANNING */
+  .create-plan-modal { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:700; display:flex; align-items:center; justify-content:center; }
+  .create-plan-box { background:#fff; border-radius:10px; width:440px; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden; animation:popIn .15s ease-out; }
+  .create-plan-header { background:#253161; color:#fff; padding:14px 18px; font-family:var(--cond); font-size:16px; font-weight:700; letter-spacing:.5px; display:flex; align-items:center; justify-content:space-between; }
+  .create-plan-body { padding:20px 18px; display:flex; flex-direction:column; gap:14px; }
+  .create-plan-field label { display:block; font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
+  .create-plan-field input { width:100%; border:2px solid var(--border-dark); border-radius:5px; padding:8px 10px; font-family:var(--sans); font-size:13px; outline:none; }
+  .create-plan-field input:focus { border-color:#253161; }
+  .type-cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .type-card { border:2px solid var(--border-dark); border-radius:8px; padding:12px; cursor:pointer; transition:all .15s; text-align:center; }
+  .type-card:hover { border-color:#253161; background:#f0f4ff; }
+  .type-card.selected { border-color:#253161; background:#e8eeff; }
+  .type-card-icon { font-size:24px; display:block; margin-bottom:6px; }
+  .type-card-title { font-family:var(--cond); font-size:13px; font-weight:700; color:var(--text); }
+  .type-card-sub { font-size:10px; color:var(--text2); margin-top:2px; }
+  .create-plan-footer { padding:14px 18px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end; }
+  .btn-create-plan { background:#253161; color:#fff; border:none; padding:9px 20px; border-radius:5px; cursor:pointer; font-size:13px; font-weight:700; font-family:var(--sans); }
+  .btn-create-plan:hover { background:#1a2450; }
+  .btn-cancel-plan { background:#fff; border:1px solid var(--border-dark); color:var(--text2); padding:9px 16px; border-radius:5px; cursor:pointer; font-size:13px; font-family:var(--sans); }
+  .btn-cancel-plan:hover { background:var(--bg); }
+
+  /* NOTES DE SEMAINE */
+  .notes-bar { background:#fffde7; border-bottom:2px solid #f0c040; padding:6px 16px; display:flex; align-items:center; gap:10px; }
+  .notes-label { font-family:var(--cond); font-size:11px; font-weight:700; color:#7a6000; text-transform:uppercase; letter-spacing:1px; white-space:nowrap; }
+  .notes-input { flex:1; background:transparent; border:none; outline:none; font-family:var(--sans); font-size:12px; color:#3a3000; font-weight:500; }
+  .notes-input::placeholder { color:#b0a060; }
+
+  /* COMPTEUR COUVERTS PDJ — ligne dans le tableau */
+  .pdj-row td { background:#e8f5e9 !important; border-top:2px solid #81c784 !important; padding:3px 4px !important; }
+  .pdj-row-label { font-family:var(--cond); font-size:10px; font-weight:700; color:#2e7d32; text-transform:uppercase; letter-spacing:.5px; }
+  .pdj-cell-input { width:100%; text-align:center; border:1px solid #a5d6a7; border-radius:3px; padding:2px 1px; font-family:var(--cond); font-size:13px; font-weight:700; color:#1b5e20; background:#fff; outline:none; }
+  .pdj-cell-input:focus { border-color:#2e7d32; background:#f1f8e9; }
+  .pdj-cell-val { font-family:var(--cond); font-size:14px; font-weight:700; color:#1b5e20; text-align:center; display:block; }
+
+  /* PRINT A3 */
+  @media print {
+    @page { size: A3 landscape; margin: 8mm; }
+    html, body { width:420mm; background:#fff !important; }
+    .app-header, .tabs, .stats-bar, .legend, .dd-overlay, .dd-popup,
+    .cal-overlay, .cal-popup, .we-cell, .col-we, .btn-dup,
+    .btn-add-extra, .btn-del-extra { display:none !important; }
+    .notes-bar { background:#fffde7 !important; border-bottom:1px solid #e0b000 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .main { padding:3px !important; }
+    .team-section { margin-bottom:5px !important; }
+    .planning-table { border:1px solid #888 !important; font-size:9px !important; }
+    .planning-table th, .planning-table td { border:1px solid #aaa !important; padding:2px !important; }
+    .shift-cell { height:38px !important; }
+    .shift-time-main { font-size:9px !important; }
+    .shift-mission { font-size:7px !important; }
+    .stm, .shift-hrs-sm { font-size:8px !important; }
+    .pdj-row td { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .pdj-cell-input { border:none !important; background:transparent !important; font-size:12px !important; }
+    .rh-badge, .rh-tip { display:none !important; }
+    .name-cell { width:110px !important; }
+    .col-day { width:85px !important; }
+    .col-total { width:40px !important; }
+  }
+
+  /* COLONNE WEEK-ENDS */
+  .col-we { width:46px; background:#f0eeff !important; color:#4a3a8a !important; }
+  .we-cell { text-align:center; background:#f0eeff; border-left:1px solid #c8b8f0; vertical-align:middle !important; padding:3px; }
+  .we-num  { font-family:var(--cond); font-size:16px; font-weight:700; color:#4a3a8a; display:block; line-height:1; }
+  .we-lbl  { font-size:8px; color:#8070b0; text-transform:uppercase; letter-spacing:.5px; }
+
+  /* EXTRAS — name cell with dropdowns */
+  .extra-name-cell { padding:3px 5px; background:#f5f7fb; border-right:2px solid var(--border-dark); vertical-align:middle !important; }
+  .extra-select { width:100%; border:1px solid var(--border-dark); border-radius:3px; padding:2px 4px; font-family:var(--sans); font-size:10px; color:var(--text); background:#fff; outline:none; margin-bottom:2px; }
+  .extra-select:focus { border-color:var(--header-bg); }
+  .btn-add-extra { width:100%; background:rgba(37,49,97,0.08); border:1px dashed #8a95a8; border-radius:3px; cursor:pointer; font-size:10px; color:#253161; font-weight:700; padding:3px; margin-top:4px; }
+  .btn-add-extra:hover { background:#253161; color:#fff; border-style:solid; }
+  .btn-del-extra { font-size:10px; color:#d05050; background:none; border:none; cursor:pointer; padding:0 2px; float:right; }
+
+  /* MODAL BASE DE DONNÉES EMPLOYÉS */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:600; display:flex; align-items:center; justify-content:center; }
+  .modal-box {
+    background:#fff; border-radius:10px; width:460px; max-height:560px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.3); display:flex; flex-direction:column;
+    overflow:hidden; animation:popIn .15s ease-out;
+  }
+  .modal-header { background:#253161; color:#fff; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; }
+  .modal-title { font-family:var(--cond); font-size:15px; font-weight:700; letter-spacing:.5px; }
+  .modal-close { background:rgba(255,255,255,.2); border:none; color:#fff; width:26px; height:26px; border-radius:4px; cursor:pointer; font-size:15px; }
+  .modal-close:hover { background:rgba(255,255,255,.35); }
+  .modal-search { padding:10px 14px; border-bottom:1px solid var(--border); }
+  .modal-search input { width:100%; border:2px solid var(--border-dark); border-radius:5px; padding:7px 10px; font-family:var(--sans); font-size:13px; outline:none; }
+  .modal-search input:focus { border-color:#253161; }
+  .modal-body { overflow-y:auto; flex:1; padding:6px; }
+  .modal-emp-item { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:5px; cursor:pointer; transition:background .1s; border-bottom:1px solid var(--border); }
+  .modal-emp-item:hover { background:#eef2ff; }
+  .modal-emp-avatar { width:32px; height:32px; border-radius:50%; background:#253161; color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--cond); font-size:12px; font-weight:700; flex-shrink:0; }
+  .modal-emp-name { font-size:13px; font-weight:700; color:var(--text); }
+  .modal-emp-post { font-size:11px; color:var(--text2); }
+  .modal-emp-mat  { font-size:10px; color:var(--text3); }
+  .modal-footer { padding:10px 14px; border-top:1px solid var(--border); display:flex; gap:8px; }
+  .btn-modal-manual { flex:1; background:#fff; border:2px solid var(--border-dark); color:var(--text); padding:8px; border-radius:5px; cursor:pointer; font-size:12px; font-weight:700; font-family:var(--sans); }
+  .btn-modal-manual:hover { border-color:#253161; color:#253161; }
+  .modal-empty { padding:30px; text-align:center; color:#8891a0; font-size:13px; }
+
+  /* PRINT */
+  @media print {
+    .app-header, .tabs, .stats-bar, .legend, .notes-bar, .pdj-bar, .dd-overlay, .dd-popup, .cal-overlay, .cal-popup, .we-cell, .col-we, .btn-dup, .btn-add-extra, .btn-del-extra { display:none !important; }
+    body { background:#fff; }
+    .main { padding:4px; }
+    .planning-table { border:1px solid #888; }
+    .planning-table th, .planning-table td { border:1px solid #aaa; }
+  }
+
+  /* Mini calendar */
+  .btn-cal { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; width:30px; height:30px; border-radius:4px; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; transition:.15s; }
+  .btn-cal:hover { background:rgba(255,255,255,0.3); }
+
+  .cal-overlay { position:fixed; inset:0; z-index:500; background:transparent; display:none; }
+  .cal-popup {
+    position:fixed; background:#fff; border:1px solid var(--border-dark);
+    border-radius:10px; width:260px; box-shadow:0 12px 40px rgba(0,0,0,0.25);
+    z-index:501; display:none; overflow:hidden;
+    animation:popIn .12s ease-out;
+  }
+  @keyframes popIn { from{opacity:0;transform:scale(.96) translateY(-4px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+  .cal-header { background:var(--header-bg); color:#fff; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; }
+  .cal-title { font-family:var(--cond); font-size:14px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; }
+  .cal-nav { background:rgba(255,255,255,0.2); border:none; color:#fff; width:26px; height:26px; border-radius:4px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; }
+  .cal-nav:hover { background:rgba(255,255,255,0.35); }
+
+  .cal-grid { padding:8px; }
+  .cal-days-header { display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:4px; }
+  .cal-day-name { text-align:center; font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; padding:3px 0; font-family:var(--cond); }
+  .cal-days { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+  .cal-day {
+    text-align:center; font-size:12px; font-family:var(--cond); font-weight:600;
+    padding:5px 2px; border-radius:4px; cursor:pointer; color:var(--text);
+    transition:background .1s;
+  }
+  .cal-day:hover { background:#e8eeff; color:var(--header-bg); }
+  .cal-day.today { background:#253161; color:#fff; }
+  .cal-day.cur-week { background:#ddeeff; color:#1a40a0; }
+  .cal-day.other-month { color:var(--text3); }
+  .cal-day.ferie { color:#b06000; font-weight:700; }
+  .cal-day.empty { cursor:default; }
+  .cal-day.empty:hover { background:transparent; }
+
+#tfband{display:none;padding:9px 16px;font-size:12px;font-family:'Montserrat',sans-serif;
+        line-height:1.5;border-bottom:1px solid}
+#tfband.tf-warn{background:#fdf6e8;border-color:#e8d9b4;color:#7a6320}
+#tfband.tf-err {background:#fdf0ee;border-color:#e8c4bc;color:#a8321f}
+#tfband.tf-info{background:#eef7ee;border-color:#c5e0c5;color:#2e7d32}
+#tfband button{margin-left:9px;font-family:inherit;font-size:11px;padding:3px 9px;
+        border:1px solid currentColor;background:none;color:inherit;border-radius:5px;cursor:pointer}
+#tfbar{display:flex;align-items:center;gap:12px;padding:8px 16px;background:#fff;
+       border-bottom:1px solid #E8DFC9;font-family:'Montserrat',sans-serif;font-size:11.5px}
+#tfbar a{color:#7A7266;text-decoration:none;font-weight:600;letter-spacing:.06em;
+         text-transform:uppercase;font-size:10.5px}
+#tfbar a:hover{color:#B8922A}
+#tfbar .sp{flex:1}
+#tfbar .qui{color:#7A7266}
+#tfbar .qui b{color:#1F1B16}
+body.tf-lecture .panel input, body.tf-lecture .panel button,
+body.tf-lecture #panel input, body.tf-lecture #panel button,
+body.tf-lecture #ed input, body.tf-lecture #ed button,
+body.tf-lecture #edit input, body.tf-lecture #edit button{
+  pointer-events:none;opacity:.55}
+body.tf-lecture #tfbar a{pointer-events:auto;opacity:1}
+</style>
+</head>
+<body>
+<div id="tfbar">
+  <a href="index.html">&larr; TableFlow</a>
+  <span class="sp"></span>
+  <span class="qui">Planning personnel · <b id="tfqui">…</b></span>
+</div>
+
+<div class="app-header">
+  <div class="app-title">🍽 Planning Team Restauration</div>
+  <div class="week-nav">
+    <button class="btn-nav" onclick="prevWeek()">‹</button>
+    <div class="week-label" id="weekLabel">—</div>
+    <button class="btn-nav" onclick="nextWeek()">›</button>
+    <button class="btn-cal" onclick="toggleCal(event)" title="Aller à une date">📅</button>
+  </div>
+  <button class="btn-save" onclick="exportPDF()" style="background:#e8f0ff;color:#253161;margin-right:4px">🖨 PDF / Imprimer</button>
+  <button class="btn-save" onclick="saveData()">💾 Enregistrer</button>
+</div>
+
+<!-- Mini calendar -->
+<div class="cal-overlay" id="calOverlay" onclick="closeCal()"></div>
+<div class="cal-popup" id="calPopup">
+  <div class="cal-header">
+    <button class="cal-nav" onclick="calPrevMonth()">‹</button>
+    <div class="cal-title" id="calTitle">—</div>
+    <button class="cal-nav" onclick="calNextMonth()">›</button>
+  </div>
+  <div class="cal-grid">
+    <div class="cal-days-header">
+      <div class="cal-day-name">Lu</div><div class="cal-day-name">Ma</div>
+      <div class="cal-day-name">Me</div><div class="cal-day-name">Je</div>
+      <div class="cal-day-name">Ve</div><div class="cal-day-name">Sa</div>
+      <div class="cal-day-name">Di</div>
+    </div>
+    <div class="cal-days" id="calDays"></div>
+  </div>
+</div>
+
+<div class="tabs" id="tabsBar">
+  <!-- rendered dynamically by renderTabs() -->
+</div>
+
+<div class="stats-bar">
+  <span>Semaine <b id="statWeek">—</b></span>
+</div>
+
+<div class="notes-bar">
+  <span class="notes-label">📝 Notes semaine :</span>
+  <input class="notes-input" id="notesInput" type="text" placeholder="Événement, groupe, info importante pour la semaine…" oninput="saveNotes()">
+</div>
+
+<div class="legend" id="legendBar">
+  <div class="legend-item"><div class="legend-dot" style="background:#b8d4e8;border:2px solid #7aaac8"></div> Matin</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c5d9a0;border:2px solid #8ab060"></div> Soir</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#9b8ec4;border:2px solid #6a5a9e"></div> Nuit</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f5d98a;border:2px solid #d4a820"></div> Coupure</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f5e642;border:2px solid #c8bd00"></div> Repos</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#a8d5a2;border:2px solid #5aaa52"></div> Congé / Récup</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f4a0a0;border:2px solid #d05050"></div> Absence</div>
+</div>
+
+<div id="mainContent" class="main"></div>
+<div id="dynPlanContent" class="main" style="display:none"></div>
+
+<!-- Modal créer un planning -->
+<div class="create-plan-modal" id="createPlanModal" style="display:none">
+  <div class="create-plan-box">
+    <div class="create-plan-header">
+      ➕ Nouveau planning
+      <button onclick="closeCreatePlan()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:26px;height:26px;border-radius:4px;cursor:pointer;font-size:15px">✕</button>
+    </div>
+    <div class="create-plan-body">
+      <div class="create-plan-field">
+        <label>Nom du planning</label>
+        <input type="text" id="newPlanName" placeholder="ex: Planning Cuisine, Extras Salle…">
+      </div>
+      <div class="create-plan-field">
+        <label>Type de personnel</label>
+        <div class="type-cards">
+          <div class="type-card selected" id="typeCard-extra" onclick="selectPlanType('extra')">
+            <span class="type-card-icon">⭐</span>
+            <div class="type-card-title">Extra</div>
+            <div class="type-card-sub">Personnel ponctuel<br>Vacataires, intérimaires</div>
+          </div>
+          <div class="type-card" id="typeCard-fixed" onclick="selectPlanType('fixed')">
+            <span class="type-card-icon">📋</span>
+            <div class="type-card-title">Contrat fixe</div>
+            <div class="type-card-sub">CDI / CDD<br>Règles RH complètes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="create-plan-footer">
+      <button class="btn-cancel-plan" onclick="closeCreatePlan()">Annuler</button>
+      <button class="btn-create-plan" onclick="confirmCreatePlan()">✓ Créer le planning</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal base de données employés -->
+<div class="modal-overlay" id="empModal" style="display:none" onclick="if(event.target===this)closeEmpModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="empModalTitle">Ajouter un employé</span>
+      <button class="modal-close" onclick="closeEmpModal()">✕</button>
+    </div>
+    <div class="modal-search">
+      <input type="text" id="empModalSearch" placeholder="🔍 Rechercher par nom, poste ou matricule…" oninput="filterEmpModal(this.value)">
+    </div>
+    <div class="modal-body" id="empModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-modal-manual" onclick="addEmpManually()">✏ Saisie manuelle</button>
+    </div>
+  </div>
+</div>
+
+<div class="dd-overlay" id="ddOverlay" style="display:none" onclick="closeDropdown()"></div>
+<div class="dd-popup" id="ddPopup" style="display:none">
+  <div class="dd-header">
+    <div class="dd-context" id="ddContext">—</div>
+    <input class="dd-search" id="ddSearch" type="text" placeholder="🔍  Rechercher horaire ou code…" autocomplete="off" oninput="filterItems(this.value)" onkeydown="handleKey(event)">
+    <div class="dd-mission-row">
+      <span class="dd-mission-lbl">Mission :</span>
+      <input class="dd-mission-inp" id="ddMission" type="text" placeholder="ex: GARDE, PDJ, INVENTAIRE…" onkeydown="if(event.key==='Enter')applySelection()">
+    </div>
+    <div class="dd-actions">
+      <button class="btn-apply" onclick="applySelection()">✓ Appliquer</button>
+      <button class="btn-clear-dd" onclick="clearShift()">✕ Effacer</button>
+    </div>
+    <div class="dd-week-row" id="ddWeekRow">
+      <button class="btn-week-apply" onclick="applyToWeek()">
+        <span class="wk-icon">📅</span>
+        <div>
+          <div>Appliquer à toute la semaine</div>
+          <div class="wk-desc">Lun→Ven : absence · Sam+Dim : REPO</div>
+        </div>
+      </button>
+    </div>
+    <div class="dd-period-row" id="ddPeriodRow">
+      <div class="dd-period-title">📆 Appliquer sur une période</div>
+      <div class="dd-period-dates">
+        <label>Du</label>
+        <input class="dd-period-input" type="date" id="ddPeriodStart">
+        <label>au</label>
+        <input class="dd-period-input" type="date" id="ddPeriodEnd">
+      </div>
+      <button class="btn-period-apply" onclick="applyToPeriod()">
+        <span class="wk-icon">✅</span>
+        <div>
+          <div>Appliquer la période</div>
+          <div class="wk-desc">Lun→Ven : absence · Sam+Dim : REPO · Jours fériés : CPFER</div>
+        </div>
+      </button>
+    </div>
+  </div>
+  <div class="dd-body" id="ddBody"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── DATA ─────────────────────────────────────────────────────
+const HORAIRES = {
+  "M1":{"time":"07h00-11h00","hours":4,"type":"matin"},
+  "M2":{"time":"08h00-12h00","hours":4,"type":"matin"},
+  "M200":{"time":"09h00-13h00","hours":4,"type":"matin"},
+  "M201":{"time":"10h00-14h00","hours":4,"type":"matin"},
+  "M202":{"time":"10h30-14h30","hours":4,"type":"matin"},
+  "M203":{"time":"11h00-15h00","hours":4,"type":"matin"},
+  "REST4":{"time":"12h00-16h00","hours":4,"type":"coupure"},
+  "REST5":{"time":"19h00-23h00","hours":4,"type":"coupure"},
+  "REST6":{"time":"19h30-23h30","hours":4,"type":"coupure"},
+  "REST7":{"time":"20h00-00h00","hours":4,"type":"coupure"},
+  "S1":{"time":"13h00-17h00","hours":4,"type":"soir"},
+  "S2":{"time":"14h00-18h00","hours":4,"type":"soir"},
+  "S3":{"time":"15h00-19h00","hours":4,"type":"soir"},
+  "S4":{"time":"16h00-20h00","hours":4,"type":"soir"},
+  "S5":{"time":"17h00-21h00","hours":4,"type":"soir"},
+  "S6":{"time":"18h00-22h00","hours":4,"type":"soir"},
+  "M3":{"time":"07h00-12h45","hours":5,"type":"matin"},
+  "M4":{"time":"08h00-13h45","hours":5,"type":"matin"},
+  "M5":{"time":"09h00-14h45","hours":5,"type":"matin"},
+  "M6":{"time":"10h00-15h45","hours":5,"type":"matin"},
+  "M7":{"time":"11h00-16h45","hours":5,"type":"matin"},
+  "M8":{"time":"12h00-17h45","hours":5,"type":"matin"},
+  "S10":{"time":"17h00-22h45","hours":5,"type":"soir"},
+  "S11":{"time":"18h00-23h45","hours":5,"type":"soir"},
+  "S110":{"time":"18h00-23h00","hours":5,"type":"soir"},
+  "S12":{"time":"19h00-00h45","hours":5,"type":"soir"},
+  "S7":{"time":"14h00-19h45","hours":5,"type":"soir"},
+  "S8":{"time":"15h00-20h45","hours":5,"type":"soir"},
+  "S9":{"time":"16h00-21h45","hours":5,"type":"soir"},
+  "M10":{"time":"07h00-13h45","hours":6,"type":"matin"},
+  "M11":{"time":"08h00-14h45","hours":6,"type":"matin"},
+  "M12":{"time":"09h00-15h45","hours":6,"type":"matin"},
+  "M13":{"time":"10h00-16h45","hours":6,"type":"matin"},
+  "M14":{"time":"11h00-17h45","hours":6,"type":"matin"},
+  "M15":{"time":"12h00-18h45","hours":6,"type":"matin"},
+  "M89":{"time":"05h30-11h30","hours":6,"type":"matin"},
+  "M9":{"time":"06h00-12h45","hours":6,"type":"matin"},
+  "REST12":{"time":"10h45-18h30","hours":6,"type":"coupure"},
+  "S13":{"time":"13h00-19h45","hours":6,"type":"soir"},
+  "S14":{"time":"14h00-20h45","hours":6,"type":"soir"},
+  "S15":{"time":"15h00-21h45","hours":6,"type":"soir"},
+  "S16":{"time":"16h00-22h45","hours":6,"type":"soir"},
+  "S17":{"time":"17h00-23h45","hours":6,"type":"soir"},
+  "S18":{"time":"18h00-00h45","hours":6,"type":"soir"},
+  "S19":{"time":"19h00-01h45","hours":6,"type":"soir"},
+  "C10":{"time":"08h00-12h45 / 18h00-21h00","hours":7,"type":"coupure"},
+  "C8":{"time":"10h00-13h30 / 17h30-21h00","hours":7,"type":"coupure"},
+  "M16":{"time":"04h30-12h15","hours":7,"type":"matin"},
+  "M17":{"time":"05h00-12h45","hours":7,"type":"matin"},
+  "M18":{"time":"05h30-13h15","hours":7,"type":"matin"},
+  "M19":{"time":"06h00-13h45","hours":7,"type":"matin"},
+  "M20":{"time":"06h30-14h15","hours":7,"type":"matin"},
+  "M21":{"time":"07h00-14h45","hours":7,"type":"matin"},
+  "M210":{"time":"07h30-15h15","hours":7,"type":"matin"},
+  "M22":{"time":"08h00-15h45","hours":7,"type":"matin"},
+  "M23":{"time":"08h30-16h15","hours":7,"type":"matin"},
+  "M24":{"time":"09h00-16h45","hours":7,"type":"matin"},
+  "M25":{"time":"10h00-17h45","hours":7,"type":"matin"},
+  "M26":{"time":"11h00-18h45","hours":7,"type":"matin"},
+  "M260":{"time":"11h30-19h15","hours":7,"type":"matin"},
+  "M27":{"time":"12h00-19h45","hours":7,"type":"matin"},
+  "M73":{"time":"12h15-20h00","hours":7,"type":"matin"},
+  "M74":{"time":"11h15-19h00","hours":7,"type":"matin"},
+  "N1":{"time":"22h00-05h45","hours":7,"type":"matin"},
+  "N5":{"time":"23h00-06h45","hours":7,"type":"matin"},
+  "REST8":{"time":"10h15-18h00","hours":7,"type":"coupure"},
+  "S20":{"time":"13h00-20h45","hours":7,"type":"soir"},
+  "S21":{"time":"13h15-21h00","hours":7,"type":"soir"},
+  "S22":{"time":"14h00-21h45","hours":7,"type":"soir"},
+  "S23":{"time":"15h00-22h45","hours":7,"type":"soir"},
+  "S230":{"time":"15h15-23h00","hours":7,"type":"soir"},
+  "S231":{"time":"15h30-23h15","hours":7,"type":"soir"},
+  "S24":{"time":"16h00-23h45","hours":7,"type":"soir"},
+  "S240":{"time":"16h30-00h15","hours":7,"type":"soir"},
+  "S25":{"time":"17h00-00h45","hours":7,"type":"soir"},
+  "S250":{"time":"17h30-01h15","hours":7,"type":"soir"},
+  "S26":{"time":"18h00-01h45","hours":7,"type":"soir"},
+  "S27":{"time":"19h00-02h45","hours":7,"type":"soir"},
+  "C1":{"time":"08h30-13h00 / 17h00-20h30","hours":8,"type":"coupure"},
+  "C11":{"time":"08h00-13h45 / 18h00-21h00","hours":8,"type":"coupure"},
+  "C15":{"time":"10h00-14h00 / 18h30-22h30","hours":8,"type":"coupure"},
+  "C2":{"time":"10h00-14h00 / 19h00-23h00","hours":8,"type":"coupure"},
+  "C3":{"time":"11h00-15h00 / 19h00-23h00","hours":8,"type":"coupure"},
+  "C4":{"time":"12h00-15h00 / 19h00-00h00","hours":8,"type":"coupure"},
+  "C6":{"time":"09h00-13h00 / 18h00-22h00","hours":8,"type":"coupure"},
+  "C7":{"time":"09h00-13h00 / 17h15-22h00","hours":8,"type":"coupure"},
+  "C9":{"time":"09h00-13h00 / 17h00-21h00","hours":8,"type":"coupure"},
+  "M28":{"time":"04h30-13h15","hours":8,"type":"matin"},
+  "M29":{"time":"05h00-13h45","hours":8,"type":"matin"},
+  "M30":{"time":"05h30-14h15","hours":8,"type":"matin"},
+  "M31":{"time":"06h00-14h45","hours":8,"type":"matin"},
+  "M32":{"time":"06h30-15h15","hours":8,"type":"matin"},
+  "M33":{"time":"07h00-15h45","hours":8,"type":"matin"},
+  "M340":{"time":"07h30-16h15","hours":8,"type":"matin"},
+  "M35":{"time":"08h00-16h45","hours":8,"type":"matin"},
+  "M36":{"time":"08h30-17h15","hours":8,"type":"matin"},
+  "M37":{"time":"09h00-17h45","hours":8,"type":"matin"},
+  "M38":{"time":"10h00-18h45","hours":8,"type":"matin"},
+  "M39":{"time":"11h00-19h45","hours":8,"type":"matin"},
+  "M390":{"time":"11h30-20h15","hours":8,"type":"matin"},
+  "M40":{"time":"12h00-20h45","hours":8,"type":"matin"},
+  "M70":{"time":"10h15-19h00","hours":8,"type":"matin"},
+  "M71":{"time":"10h30-19h15","hours":8,"type":"matin"},
+  "M72":{"time":"10h45-19h30","hours":8,"type":"matin"},
+  "N6":{"time":"23h00-07h45","hours":8,"type":"matin"},
+  "S28":{"time":"13h00-21h45","hours":8,"type":"soir"},
+  "S29":{"time":"13h15-22h00","hours":8,"type":"soir"},
+  "S30":{"time":"13h30-22h15","hours":8,"type":"soir"},
+  "S31":{"time":"14h00-22h45","hours":8,"type":"soir"},
+  "S310":{"time":"14h15-23h00","hours":8,"type":"soir"},
+  "S32":{"time":"14h30-23h15","hours":8,"type":"soir"},
+  "S33":{"time":"14h45-23h30","hours":8,"type":"soir"},
+  "S34":{"time":"15h00-23h45","hours":8,"type":"soir"},
+  "S35":{"time":"15h30-00h15","hours":8,"type":"soir"},
+  "S36":{"time":"16h00-00h45","hours":8,"type":"soir"},
+  "S37":{"time":"16h30-01h15","hours":8,"type":"soir"},
+  "S38":{"time":"17h00-01h45","hours":8,"type":"soir"},
+  "S39":{"time":"17h30-02h15","hours":8,"type":"soir"},
+  "S40":{"time":"18h00-02h45","hours":8,"type":"soir"},
+  "S41":{"time":"18h30-03h15","hours":8,"type":"soir"},
+  "S42":{"time":"19h00-03h45","hours":8,"type":"soir"},
+  "C12":{"time":"09h45-15h00 / 18h15-22h45","hours":9,"type":"coupure"},
+  "C13":{"time":"10h00-14h45 / 18h00-23h00","hours":9,"type":"coupure"},
+  "M409":{"time":"05h30-15h15","hours":9,"type":"matin"},
+  "M41":{"time":"06h00-15h45","hours":9,"type":"matin"},
+  "M42":{"time":"07h00-16h45","hours":9,"type":"matin"},
+  "M43":{"time":"08h00-17h45","hours":9,"type":"matin"},
+  "M44":{"time":"09h00-18h45","hours":9,"type":"matin"},
+  "M45":{"time":"10h00-19h45","hours":9,"type":"matin"},
+  "M46":{"time":"11h00-20h45","hours":9,"type":"matin"},
+  "M460":{"time":"11h30-21h15","hours":9,"type":"matin"},
+  "M47":{"time":"12h00-21h45","hours":9,"type":"matin"},
+  "REST1":{"time":"07h30-17h15","hours":9,"type":"coupure"},
+  "REST13":{"time":"10h45-20h30","hours":9,"type":"coupure"},
+  "REST9":{"time":"10h15-20h00","hours":9,"type":"coupure"},
+  "S43":{"time":"13h00-22h45","hours":9,"type":"soir"},
+  "S44":{"time":"14h00-23h45","hours":9,"type":"soir"},
+  "S45":{"time":"15h00-00h45","hours":9,"type":"soir"},
+  "S450":{"time":"15h30-01h15","hours":9,"type":"soir"},
+  "S46":{"time":"16h00-01h45","hours":9,"type":"soir"},
+  "S460":{"time":"16h30-02h15","hours":9,"type":"soir"},
+  "S47":{"time":"17h00-02h45","hours":9,"type":"soir"},
+  "S48":{"time":"18h00-03h45","hours":9,"type":"soir"},
+  "S49":{"time":"19h00-04h45","hours":9,"type":"soir"},
+  "C14":{"time":"10h00-15h45 / 18h00-23h00","hours":10,"type":"coupure"},
+  "C5":{"time":"10h00-14h00 / 17h00-23h00","hours":10,"type":"coupure"},
+  "M479":{"time":"05h30-16h15","hours":10,"type":"matin"},
+  "M48":{"time":"06h00-16h45","hours":10,"type":"matin"},
+  "M49":{"time":"07h00-17h45","hours":10,"type":"matin"},
+  "M50":{"time":"08h00-18h45","hours":10,"type":"matin"},
+  "M51":{"time":"09h00-19h45","hours":10,"type":"matin"},
+  "M52":{"time":"10h00-20h45","hours":10,"type":"matin"},
+  "M53":{"time":"11h00-21h45","hours":10,"type":"matin"},
+  "M54":{"time":"12h00-22h45","hours":10,"type":"matin"},
+  "REST10":{"time":"10h15-21h00","hours":10,"type":"coupure"},
+  "REST14":{"time":"10h45-21h30","hours":10,"type":"coupure"},
+  "S50":{"time":"13h00-23h45","hours":10,"type":"soir"},
+  "S51":{"time":"14h00-00h45","hours":10,"type":"soir"},
+  "S52":{"time":"15h00-01h45","hours":10,"type":"soir"},
+  "S53":{"time":"16h00-02h45","hours":10,"type":"soir"},
+  "S54":{"time":"17h00-03h45","hours":10,"type":"soir"},
+  "S55":{"time":"18h00-04h45","hours":10,"type":"soir"},
+  "S56":{"time":"19h00-05h45","hours":10,"type":"soir"},
+  "M549":{"time":"05h30-17h15","hours":11,"type":"matin"},
+  "M55":{"time":"06h00-17h45","hours":11,"type":"matin"},
+  "M56":{"time":"07h00-18h45","hours":11,"type":"matin"},
+  "M57":{"time":"08h00-19h45","hours":11,"type":"matin"},
+  "M58":{"time":"09h00-20h45","hours":11,"type":"matin"},
+  "M59":{"time":"10h00-21h45","hours":11,"type":"matin"},
+  "M60":{"time":"11h00-22h45","hours":11,"type":"matin"},
+  "M61":{"time":"12h00-23h45","hours":11,"type":"matin"},
+  "REST11":{"time":"10h15-22h00","hours":11,"type":"coupure"},
+  "REST15":{"time":"10h45-22h30","hours":11,"type":"coupure"},
+  "REST2":{"time":"13h30-01h15","hours":11,"type":"coupure"},
+  "REST3":{"time":"13h00-00h45","hours":11,"type":"coupure"}
+};
+
+const ABSENCES = {
+  "REPO": {label:"Repos",                color:"repos"},
+  "RHEB": {label:"Repos Hebdomadaire",   color:"repos"},
+  "RETP": {label:"Repos Temps Partiel",  color:"repos"},
+  "GCP":  {label:"Congé Payé",           color:"conge"},
+  "CPFER":{label:"Jour Férié",           color:"conge"},
+  "JFEP": {label:"Récup. Jour Férié",    color:"conge"},
+  "RCR":  {label:"Récup. Compensatrice", color:"conge"},
+  "RCN":  {label:"Récup. de Nuit",       color:"conge"},
+  "RECUP":{label:"Récupération",         color:"conge"},
+  "FORIN":{label:"Formation Interne",    color:"conge"},
+  "FOREX":{label:"Formation Extérieure", color:"conge"},
+  "ECOLE":{label:"École",               color:"conge"},
+  "CMAL": {label:"Congé Maladie",        color:"absence"},
+  "CMAT": {label:"Congé Maternité",      color:"absence"},
+  "AT":   {label:"Accident Travail",     color:"absence"},
+  "MAL":  {label:"Maladie",             color:"absence"},
+  "INJUS":{label:"Absence Injustifiée",  color:"absence"},
+};
+
+const TYPE_COLOR = {
+  matin:   {bg:"#b8d4e8", border:"#5a9cc5", text:"#082840"},
+  soir:    {bg:"#c5d9a0", border:"#7ab050", text:"#1a3805"},
+  nuit:    {bg:"#b0a0d8", border:"#6050a8", text:"#180a38"},
+  coupure: {bg:"#f5d98a", border:"#c8a010", text:"#3a2200"},
+  repos:   {bg:"#f5e642", border:"#b8b000", text:"#2a2200"},
+  conge:   {bg:"#a8d5a2", border:"#50a848", text:"#0a2808"},
+  absence: {bg:"#f4a0a0", border:"#c84848", text:"#380808"},
+};
+
+const DEFAULT_TEAMS = [
+  {id:"t1", name:"ÉQUIPE RESTAURANT", employees:[
+    {id:"e1",  name:"Antoine FORSTER",       post:"Resp. Restauration"},
+    {id:"e2",  name:"Christophe MOLINAROLI", post:"Assist. Resp. Restauration"},
+    {id:"e3",  name:"Franck CASTAING",       post:"Maître d'hôtel"},
+    {id:"e4",  name:"Patricia JULIEN",       post:"Maître d'hôtel"},
+    {id:"e5",  name:"Christophe SERRES",     post:"Assist. Maître d'hôtel"},
+    {id:"e6",  name:"Nicolas CHIOTTI",       post:"Chef de Rang"},
+    {id:"e7",  name:"Mouna MELITTI",         post:"Chef de Rang"},
+    {id:"e8",  name:"Florian DOCHIER",       post:"Chef Barman"},
+    {id:"e9",  name:"Cesar CALLEJAS CALA",   post:"Barmaid"},
+    {id:"e10", name:"Laurie CHALOPIN",       post:"Barmaid"},
+    {id:"e11", name:"Fidèle SOUMAILA",       post:"Serveuse"},
+  ]},
+  {id:"t2", name:"ÉQUIPE SALON", employees:[
+    {id:"e12", name:"Youssoufa MOINDJIE",    post:"Équipier"},
+    {id:"e13", name:"Bacar M'MADI",          post:"Équipier"},
+    {id:"e14", name:"Abdel ZAARAOUI",        post:"Employé Polyvalent"},
+  ]},
+  {id:"t3", name:"ÉQUIPE CUISINE", employees:[
+    {id:"e15", name:"Philippe POETTE",       post:"Chef de Cuisine"},
+    {id:"e16", name:"Morgan FRAISSE",        post:"Second de Cuisine"},
+    {id:"e17", name:"Aboubaker REGAGBA",     post:"Chef de Partie"},
+    {id:"e18", name:"Lucas COURBIS",         post:"Chef de Partie"},
+    {id:"e19", name:"Halifa HASSANI",        post:"Commis de Cuisine"},
+    {id:"e20", name:"Mina ZEMRINI",          post:"Resp. Buffet PDJ"},
+  ]},
+  {id:"t4", name:"ÉCONOMAT", employees:[
+    {id:"e21", name:"Sébastien STRAVATO",    post:"Magazinier"},
+  ]},
+  {id:"t5", name:"ÉQUIPE PLONGE", employees:[
+    {id:"e22", name:"M'Madina MBOUSSOURI",   post:"Plongeur"},
+    {id:"e23", name:"Youssoufa M'BAN PANDZA",post:"Agent d'entretien"},
+  ]},
+];
+
+// TEAMS est dynamique — chargé depuis localStorage
+let TEAMS = [];
+
+
+// ============ TABLEFLOW — socle partagé ============
+const SUPABASE_URL = "https://auxnjixcppmsqmqkmjsj.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1eG5qaXhjcHBtc3FtcWttanNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NDkzNDIsImV4cCI6MjEwMDEyNTM0Mn0.sHT_4cpxIBaqaGTnLDevCjWcnLe8gn0dG1sTo6dbjXE";
+const DOC_ID  = "planning_staff";
+const MODULE  = "staff";
+const TITRE_MODULE = "Planning personnel";
+
+let sb=null, moi=null, profil=null;
+let jeEdite=false, minuterieVerrou=null, minuterieSauve=null;
+let sauveEnCours=false, sauveDemandee=false;
+
+// miroir des règles SQL — l'interface s'aligne, la base tranche
+const ECRITURE = {
+  menu_bar:     {admin:1, bar:1},
+  menu_banquet: {admin:1, maitre_hotel:1},
+  room:         {admin:1},
+  staff:        {admin:1},
+  activite:     {admin:1},
+  salons:       {admin:1},
+};
+const LECTURE = {
+  menu_bar:     {admin:1, bar:1},
+  menu_banquet: {admin:1, maitre_hotel:1},
+  room:         {admin:1},
+  staff:        {admin:1, revenus:1},
+  activite:     {admin:1, maitre_hotel:1, commercial:1, revenus:1},
+  salons:       {admin:1, maitre_hotel:1, commercial:1, salons_seul:1, revenus:1},
+};
+
+function tfBandeau(txt, type){
+  let z=document.getElementById('tfband');
+  if(!z){ z=document.createElement('div'); z.id='tfband';
+          document.body.insertBefore(z, document.body.firstChild); }
+  if(!txt){ z.style.display='none'; return; }
+  z.className='tf-'+(type||'info'); z.innerHTML=txt; z.style.display='block';
+}
+function tfEtat(m){
+  ['status','st','stat'].forEach(id=>{
+    const e=document.getElementById(id); if(e) e.textContent=m; });
+}
+
+async function tfDemarrer(){
+  if(SUPABASE_URL.startsWith('__')){
+    tfBandeau("Module non configuré — adresse Supabase manquante.",'err'); return false; }
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const {data} = await sb.auth.getSession();
+  if(!data.session){ location.href='index.html'; return false; }
+  moi = data.session.user;
+  const {data:p} = await sb.from('profils').select('*').eq('id',moi.id).single();
+  if(!p){ location.href='index.html'; return false; }
+  profil = p;
+  if(!(LECTURE[MODULE]||{})[p.role]){
+    document.body.innerHTML =
+      '<div style="font-family:Montserrat,sans-serif;padding:60px;text-align:center;color:#7A7266">'+
+      '<h2 style="font-family:Cinzel,serif;letter-spacing:.12em;color:#1F1B16">Accès refusé</h2>'+
+      '<p style="margin:14px 0 24px">Ce module ne vous est pas attribué.</p>'+
+      '<a href="index.html" style="color:#B8922A">Retour à TableFlow</a></div>';
+    return false;
+  }
+  return true;
+}
+
+async function tfPrendreVerrou(){
+  const {data:v} = await sb.from('verrous').select('*').eq('document_id',DOC_ID).maybeSingle();
+  const limite = Date.now() - 10*60*1000;
+  if(v && v.detenu_par !== moi.id && new Date(v.vu_le).getTime() > limite){
+    jeEdite=false;
+    tfBandeau('<b>Lecture seule</b> — '+v.detenu_nom+' modifie ce document en ce moment. '+
+      '<button onclick="location.reload()">Réessayer</button>','warn');
+    return false;
+  }
+  const {error} = await sb.from('verrous').upsert({
+    document_id:DOC_ID, detenu_par:moi.id, detenu_nom:profil.nom,
+    pris_le:new Date().toISOString(), vu_le:new Date().toISOString()});
+  if(error){ jeEdite=false; tfBandeau('Lecture seule — verrou indisponible.','warn'); return false; }
+  jeEdite=true;
+  minuterieVerrou=setInterval(async()=>{
+    await sb.from('verrous').update({vu_le:new Date().toISOString()})
+            .eq('document_id',DOC_ID).eq('detenu_par',moi.id);
+  },60000);
+  return true;
+}
+async function tfLacherVerrou(){
+  if(minuterieVerrou) clearInterval(minuterieVerrou);
+  if(jeEdite && sb) await sb.from('verrous').delete()
+      .eq('document_id',DOC_ID).eq('detenu_par',moi.id);
+}
+
+async function tfCharger(){
+  const {data,error} = await sb.from('documents')
+        .select('contenu,maj_le,maj_par_nom').eq('id',DOC_ID).single();
+  if(error){ tfBandeau("Lecture impossible : "+error.message,'err'); return null; }
+  return data;
+}
+async function tfSauver(){
+  if(!jeEdite) return;
+  if(sauveEnCours){ sauveDemandee=true; return; }
+  sauveEnCours=true;
+  const {error} = await sb.from('documents').update({contenu:D}).eq('id',DOC_ID);
+  sauveEnCours=false;
+  if(error) tfBandeau("Enregistrement refusé : "+error.message,'err');
+  else tfEtat('Enregistré — '+new Date().toLocaleTimeString('fr-FR'));
+  if(sauveDemandee){ sauveDemandee=false; tfSauver(); }
+}
+function tfSauverPlusTard(){
+  if(!jeEdite) return;
+  if(minuterieSauve) clearTimeout(minuterieSauve);
+  tfEtat('Modification en attente…');
+  minuterieSauve=setTimeout(tfSauver,1200);
+}
+window.addEventListener('pagehide', tfLacherVerrou);
+
+
+// ---- Pont : les 6 clés locales deviennent un seul document partagé ----
+let D = {planning_v2:{}, planning_teams:null, emp_db:null,
+         extra_plannings:null, planning_notes:{}, planning_pdj:{}};
+
+const _ls_get = localStorage.getItem.bind(localStorage);
+const _ls_set = localStorage.setItem.bind(localStorage);
+const CLES = ['planning_v2','planning_teams','emp_db','extra_plannings',
+              'planning_notes','planning_pdj'];
+
+localStorage.getItem = function(k){
+  if(CLES.includes(k)) return D[k]==null ? null : JSON.stringify(D[k]);
+  return _ls_get(k);
+};
+localStorage.setItem = function(k,v){
+  if(CLES.includes(k)){
+    try{ D[k] = JSON.parse(v); }catch(e){ D[k] = v; }
+    tfSauverPlusTard();
+    return;
+  }
+  return _ls_set(k,v);
+};
+
+function loadTeams() {
+  try {
+    const saved = localStorage.getItem('planning_teams');
+    TEAMS = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_TEAMS));
+  } catch(e) {
+    TEAMS = JSON.parse(JSON.stringify(DEFAULT_TEAMS));
+  }
+}
+
+function saveTeams() {
+  localStorage.setItem('planning_teams', JSON.stringify(TEAMS));
+}
+
+function genId(prefix) {
+  return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+}
+
+// ── STATE ────────────────────────────────────────────────────
+let currentWeekStart = getMonday(new Date());
+let planning = {};
+let activeCell = null;
+let selectedCode = null;
+let filteredItems = [];
+let activeIndex = 0;
+let dragSource = null;     // glisser-déposer d'un horaire
+let empDragSource = null;  // glisser-déposer d'un employé entre sections
+
+const DAYS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+
+function getMonday(d) {
+  const dt=new Date(d), day=dt.getDay();
+  dt.setDate(dt.getDate()-day+(day===0?-6:1)); dt.setHours(0,0,0,0); return dt;
+}
+// Format date as YYYY-MM-DD using LOCAL time (not UTC) to avoid timezone offset bugs
+function localDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getDayDate(i) { const d=new Date(currentWeekStart); d.setDate(d.getDate()+i); return d; }
+function getKey(eid,i)  { return `${eid}_${localDateStr(getDayDate(i))}`; }
+function getWeekNum(d) {
+  const u=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const dn=u.getUTCDay()||7; u.setUTCDate(u.getUTCDate()+4-dn);
+  const ys=new Date(Date.UTC(u.getUTCFullYear(),0,1));
+  return Math.ceil((((u-ys)/86400000)+1)/7);
+}
+function prevWeek(){ currentWeekStart.setDate(currentWeekStart.getDate()-7); if(currentTab==='main') render(); else renderDynPlan(currentTab); }
+function nextWeek(){ currentWeekStart.setDate(currentWeekStart.getDate()+7); if(currentTab==='main') render(); else renderDynPlan(currentTab); }
+
+// ── RH ALERT ENGINE ──────────────────────────────────────────
+
+const REST_CODES = new Set(['REPO','RHEB','RETP','GCP','CPFER','JFEP','RCR','RCN',
+                             'RECUP','FORIN','FOREX','ECOLE','CMAL','CMAT','AT','MAL','INJUS']);
+
+function isWorkDay(code) { return !!code && !REST_CODES.has(code.toUpperCase()); }
+function isRestDay(code)  { const c=code?.toUpperCase(); return c==='REPO'||c==='RHEB'; }
+
+function getPlanVal(empId, d) {
+  return planning[`${empId}_${localDateStr(d)}`];
+}
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+
+// Parse shift → { start, end } in minutes. Handles midnight crossover.
+function parseTimes(code) {
+  if (!code) return null;
+  const h = HORAIRES[code.toUpperCase()];
+  if (!h) return null;
+  const raw = h.time.split(' / ')[0];
+  const m = raw.match(/(\d{1,2})h(\d{2})-(\d{1,2})h(\d{2})/i);
+  if (!m) return null;
+  const s = +m[1]*60 + +m[2];
+  let e   = +m[3]*60 + +m[4];
+  if (e <= s) e += 1440;
+  return { start:s, end:e };
+}
+
+// Full amplitude for coupure (first start → last end)
+function parseAmplitude(code) {
+  if (!code) return null;
+  const h = HORAIRES[code.toUpperCase()];
+  if (!h) return null;
+  const parts = h.time.split(' / ');
+  let first=null, last=null;
+  parts.forEach(p=>{
+    const m=p.match(/(\d{1,2})h(\d{2})-(\d{1,2})h(\d{2})/i);
+    if(!m) return;
+    const s=+m[1]*60+(+m[2]);
+    let e=+m[3]*60+(+m[4]);
+    if(e<=s) e+=1440;
+    if(first===null||s<first) first=s;
+    if(last===null||e>last)   last=e;
+  });
+  if(first===null) return null;
+  return last-first;
+}
+
+// Returns a map: dayIndex (0-6) → { level:'red'|'orange', messages:[...] }
+// Plus a special key 'week' for week-level alerts (rest days)
+function buildRHAlerts(emp) {
+  const alerts = {}; // dayIndex → { level, messages }
+
+  const flag = (di, level, msg) => {
+    if (!alerts[di]) alerts[di] = { level, messages:[] };
+    if (level==='red' && alerts[di].level!=='red') alerts[di].level='red';
+    alerts[di].messages.push(msg);
+  };
+
+  // ── 0. VÉRIFIER SI LA LIGNE EST COMPLÈTE (7 jours remplis) ──
+  // Les alertes RH ne s'affichent que si toute la semaine est planifiée
+  let filledDays = 0;
+  for (let di=0; di<7; di++) {
+    const v = getPlanVal(emp.id, getDayDate(di));
+    if (v?.code) filledDays++;
+  }
+  if (filledDays < 7) return alerts; // ligne incomplète → pas d'alerte
+
+  // ── 1. AMPLITUDE > 12h ───────────────────────────────────────
+  for (let di=0; di<7; di++) {
+    const val = getPlanVal(emp.id, getDayDate(di));
+    const code = val?.code||'';
+    if (!code || !isWorkDay(code)) continue;
+    const amp = parseAmplitude(code);
+    if (amp && amp > 720) {
+      const hrs = (amp/60).toFixed(1);
+      flag(di, 'red', `🔴 Amplitude de ${hrs}h (max 12h)`);
+    }
+  }
+
+  // ── 2. REPOS < 11h entre deux shifts ────────────────────────
+  for (let di=0; di<7; di++) {
+    const val  = getPlanVal(emp.id, getDayDate(di));
+    const code = val?.code||'';
+    if (!code || !isWorkDay(code)) continue;
+    const cur = parseTimes(code);
+    if (!cur) continue;
+
+    const prevDay  = addDays(getDayDate(di), -1);
+    const prevVal  = getPlanVal(emp.id, prevDay);
+    const prevCode = prevVal?.code||'';
+    if (!prevCode || !isWorkDay(prevCode)) continue;
+    const prev = parseTimes(prevCode);
+    if (!prev) continue;
+
+    // Gap = (start of current day + 24h) - end of previous day
+    const gap = (cur.start + 1440) - prev.end;
+    if (gap < 660) { // 660 min = 11h
+      const hrs = (gap/60).toFixed(1);
+      flag(di, 'red', `🔴 Seulement ${hrs}h de repos depuis le shift précédent (min. 11h)`);
+    }
+  }
+
+  // ── 3. JOURS CONSÉCUTIFS (fenêtre -15j à +6j) ───────────────
+  // Find streaks that overlap the current week
+  const streaks = []; // { start: offset, length }
+  let run = 0, runStart = 0;
+  for (let offset=-15; offset<=6; offset++) {
+    const d = addDays(currentWeekStart, offset);
+    const v = getPlanVal(emp.id, d);
+    if (isWorkDay(v?.code)) {
+      if (run===0) runStart=offset;
+      run++;
+    } else {
+      if (run>0) streaks.push({ start:runStart, len:run });
+      run=0;
+    }
+  }
+  if (run>0) streaks.push({ start:runStart, len:run });
+
+  streaks.forEach(({start:s, len})=>{
+    // Does this streak overlap current week (offsets 0..6)?
+    const end = s+len-1;
+    if (end < 0 || s > 6) return; // no overlap
+
+    // Which days of current week are in this streak?
+    for (let di=0; di<7; di++) {
+      const offset = di; // offset of day di from week start
+      if (offset >= s && offset <= end) {
+        const consecDay = offset - s + 1; // position within streak
+        if (len > 10) {
+          flag(di, 'red', `🔴 ${len} jours consécutifs (max absolu : 10 jours)`);
+        } else if (len >= 7) {
+          flag(di, 'orange', `⚠ ${len} jours consécutifs (recommandé : max 7 jours)`);
+        }
+      }
+    }
+  });
+
+  // ── 4. MOINS DE 2 JOURS DE REPOS DANS LA SEMAINE ────────────
+  // Flag on days that are worked when there's a shortage
+  let restCount = 0;
+  for (let di=0; di<7; di++) {
+    const v = getPlanVal(emp.id, getDayDate(di));
+    if (isRestDay(v?.code)) restCount++;
+  }
+  if (restCount < 2) {
+    // Flag on all worked days of the week
+    for (let di=0; di<7; di++) {
+      const v = getPlanVal(emp.id, getDayDate(di));
+      if (isWorkDay(v?.code)) {
+        flag(di, 'orange', `⚠ Seulement ${restCount} jour(s) REPO/RHEB cette semaine (min. 2)`);
+      }
+    }
+  }
+
+  return alerts;
+}
+
+// ── RENDER ───────────────────────────────────────────────────
+function render() {
+  const today=new Date(); today.setHours(0,0,0,0);
+  const days=Array.from({length:7},(_,i)=>getDayDate(i));
+  const wn=getWeekNum(days[0]);
+
+  document.getElementById('weekLabel').textContent=
+    `Sem. ${wn} — ${days[0].toLocaleDateString('fr-FR',{day:'numeric',month:'long'})} au ${days[6].toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}`;
+  document.getElementById('statWeek').textContent=wn;
+
+  let totalEmp=0,totalPlanned=0,totalHours=0;
+  TEAMS.forEach(t=>totalEmp+=t.employees.length);
+
+  const main=document.getElementById('mainContent'); main.innerHTML='';
+
+  TEAMS.forEach((team, teamIdx)=>{
+    const sec=document.createElement('div'); sec.className='team-section';
+
+    // Team header with edit controls
+    const th=document.createElement('div'); th.className='team-header-row';
+    th.innerHTML=`
+      <span class="team-name-label">${team.name}</span>
+      <button class="btn-team-action" onclick="renameTeam(${teamIdx})">✏ Renommer</button>
+      <button class="btn-team-action" onclick="addEmployee(${teamIdx})">+ Employé</button>
+      <button class="btn-team-action btn-team-del" onclick="deleteTeam(${teamIdx})">✕</button>
+    `;
+    sec.appendChild(th);
+
+    const table=document.createElement('table'); table.className='planning-table';
+
+    // THEAD
+    const thead=document.createElement('thead');
+    const trh=document.createElement('tr');
+    addTH(trh,'Collaborateur','col-name');
+    days.forEach((d,i)=>{
+      const th2=document.createElement('th');
+      const dStr=localDateStr(d);
+      const isFerie=JOURS_FERIES_2026.has(dStr);
+      const isToday=localDateStr(d)===localDateStr(today);
+      let thCls='col-day';
+      if(isToday && isFerie) thCls+=' today-ferie';
+      else if(isToday) thCls+=' today-col';
+      else if(isFerie) thCls+=' ferie-col';
+      th2.className=thCls;
+      th2.innerHTML=`<span class="day-name-th">${DAYS[i]}</span><span class="day-date-th">${d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</span>`;
+      trh.appendChild(th2);
+    });
+    addTH(trh,'Total','col-total');
+    addTH(trh,'WE 💤','col-we');
+    thead.appendChild(trh); table.appendChild(thead);
+
+    // TBODY
+    const tbody=document.createElement('tbody');
+    team.employees.forEach((emp, empIdx)=>{
+      const tr=document.createElement('tr'); tr.className='emp-row';
+      const parts=emp.name.split(' ');
+
+      // Build RH alerts map for this employee (dayIndex → {level, messages})
+      const rhAlerts = buildRHAlerts(emp);
+
+      const tdN=document.createElement('td'); tdN.className='name-cell';
+      tdN.setAttribute('draggable','true');
+      tdN.dataset.empid = emp.id;
+      tdN.dataset.teamidx = teamIdx;
+      tdN.dataset.empidx = empIdx;
+      tdN.innerHTML=`
+        <button class="btn-del-emp" onclick="deleteEmployee(${teamIdx},${empIdx})" title="Supprimer">✕</button>
+        <div class="emp-first">${parts[0]}</div>
+        <div class="emp-last">${parts.slice(1).join(' ')}</div>
+        <div class="emp-post">${emp.post}</div>
+        <button class="btn-dup" onclick="dupPrevWeek('${emp.id}',event)" title="Dupliquer la semaine précédente">↩ Sem. préc.</button>
+      `;
+
+      // Drag employee to another section
+      tdN.addEventListener('dragstart', e => {
+        empDragSource = { teamIdx, empIdx, emp };
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', 'emp');
+        tdN.style.opacity = '0.4';
+        e.stopPropagation();
+      });
+      tdN.addEventListener('dragend', () => { tdN.style.opacity = ''; empDragSource = null; });
+
+      tr.appendChild(tdN);
+
+      let wkHours=0;
+      days.forEach((_,di)=>{
+        const key=getKey(emp.id,di);
+        const val=planning[key];
+        const code=val?.code||'', mission=val?.mission||'';
+        if(code) totalPlanned++;
+        const info=code?(HORAIRES[code.toUpperCase()]||ABSENCES[code.toUpperCase()]):null;
+        if(info?.hours){ wkHours+=info.hours; totalHours+=info.hours; }
+
+        const td=document.createElement('td');
+        td.className='shift-cell'+(code?'':' empty-cell');
+        td.dataset.key=key; td.dataset.empname=emp.name; td.dataset.dayname=DAYS[di];
+
+        // RH badge for this day
+        const rh = rhAlerts[di];
+        let rhHTML = '';
+        if (rh) {
+          const icon = rh.level === 'red' ? '🔴' : '🟠';
+          const tipText = rh.messages.join('<br>');
+          rhHTML = `<span class="rh-badge">${icon}</span><div class="rh-tip">${tipText}</div>`;
+        }
+
+        if(code){
+          const type=getType(code), col=TYPE_COLOR[type]||TYPE_COLOR.matin;
+          td.style.background=col.bg;
+          td.style.borderLeft=`3px solid ${col.border}`;
+          td.innerHTML=buildShift(code,mission,col)+rhHTML;
+          td.setAttribute('draggable','true');
+        } else {
+          td.innerHTML=`<div class="plus-hint">+</div>${rhHTML}`;
+        }
+        td.addEventListener('click',e=>openDD(e,td));
+
+        // ── Drag & Drop events ──
+        td.addEventListener('dragstart', e => {
+          if (!code) { e.preventDefault(); return; }
+          dragSource = { key, code, mission };
+          td.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'copy';
+        });
+        td.addEventListener('dragend', () => td.classList.remove('dragging'));
+        td.addEventListener('dragover', e => {
+          if (!dragSource || dragSource.key === key) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+          td.classList.add('drag-over');
+        });
+        td.addEventListener('dragleave', () => td.classList.remove('drag-over'));
+        td.addEventListener('drop', e => {
+          e.preventDefault();
+          td.classList.remove('drag-over');
+          if (!dragSource || dragSource.key === key) return;
+          planning[key] = { code: dragSource.code, mission: dragSource.mission };
+          dragSource = null;
+          render();
+          showToast(`✓ Horaire copié`);
+        });
+        tr.appendChild(td);
+      });
+
+      const tdT=document.createElement('td');
+      tdT.className='total-cell'+(wkHours===0?' zero':'');
+      tdT.innerHTML=wkHours>0
+        ?`<span class="total-hrs">${wkHours}</span><span class="total-lbl">heures</span>`
+        :`<span class="total-hrs" style="color:#c8d0e0;font-size:16px">—</span>`;
+      tr.appendChild(tdT);
+
+      // Colonne week-ends (manager only — hidden in print)
+      const weCount = countWeekends(emp.id);
+      const tdWe = document.createElement('td');
+      tdWe.className = 'we-cell';
+      tdWe.innerHTML = `<span class="we-num">${weCount}</span><span class="we-lbl">WE</span>`;
+      tr.appendChild(tdWe);
+
+      tbody.appendChild(tr);
+    });
+
+    // LIGNE PDJ en bas du premier tableau seulement (équipe restaurant)
+    const isFirstTeam = team === TEAMS[0];
+    if (isFirstTeam) {
+      const pdjTr = document.createElement('tr');
+      pdjTr.className = 'pdj-row';
+      const pdjLabel = document.createElement('td');
+      pdjLabel.style.cssText = 'background:#e8f5e9!important;padding:4px 6px!important;border-right:2px solid #81c784!important;vertical-align:middle!important;';
+      pdjLabel.innerHTML = '<span class="pdj-row-label">☕ Couverts PDJ</span>';
+      pdjTr.appendChild(pdjLabel);
+
+      const wkKey = localDateStr(currentWeekStart);
+      const pdjSaved = JSON.parse(localStorage.getItem('planning_pdj')||'{}');
+
+      for (let di=0; di<7; di++) {
+        const key = `${wkKey}_${di}`;
+        const tdPdj = document.createElement('td');
+        tdPdj.style.cssText = 'background:#e8f5e9!important;padding:3px!important;text-align:center!important;';
+        const inp = document.createElement('input');
+        inp.type = 'number'; inp.min = '0'; inp.max = '999';
+        inp.className = 'pdj-cell-input';
+        inp.placeholder = '—';
+        inp.value = pdjSaved[key] || '';
+        inp.addEventListener('change', () => {
+          const s = JSON.parse(localStorage.getItem('planning_pdj')||'{}');
+          if (inp.value) s[key] = parseInt(inp.value); else delete s[key];
+          localStorage.setItem('planning_pdj', JSON.stringify(s));
+        });
+        tdPdj.appendChild(inp);
+        pdjTr.appendChild(tdPdj);
+      }
+      // Total PDJ + WE empty cells
+      const tdPdjTot = document.createElement('td');
+      tdPdjTot.style.cssText = 'background:#e8f5e9!important;';
+      pdjTr.appendChild(tdPdjTot);
+      const tdPdjWe = document.createElement('td');
+      tdPdjWe.style.cssText = 'background:#e8f5e9!important;';
+      pdjTr.appendChild(tdPdjWe);
+      tbody.appendChild(pdjTr);
+    }
+
+    table.appendChild(tbody);
+
+    // Drop zone pour recevoir un employé glissé depuis une autre section
+    tbody.addEventListener('dragover', e => {
+      if (!empDragSource) return;
+      e.preventDefault();
+      tbody.style.outline = '2px dashed #4a7adf';
+    });
+    tbody.addEventListener('dragleave', () => { tbody.style.outline = ''; });
+    tbody.addEventListener('drop', e => {
+      e.preventDefault();
+      tbody.style.outline = '';
+      if (!empDragSource) return;
+      const { teamIdx: srcTeam, empIdx: srcEmp, emp } = empDragSource;
+      if (srcTeam === teamIdx) return; // même section
+      // Déplacer l'employé
+      TEAMS[srcTeam].employees.splice(srcEmp, 1);
+      TEAMS[teamIdx].employees.push(emp);
+      saveTeams();
+      empDragSource = null;
+      render();
+      showToast(`✓ ${emp.name} déplacé vers ${team.name}`);
+    });
+
+    sec.appendChild(table); main.appendChild(sec);
+  });
+
+  // Bouton ajouter une section
+  const btnSec = document.createElement('button');
+  btnSec.className = 'btn-add-section';
+  btnSec.textContent = '+ Ajouter une section';
+  btnSec.onclick = addTeam;
+  main.appendChild(btnSec);
+
+  const setStat=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v;};
+  setStat('statEmp',totalEmp);
+  setStat('statPlanned',totalPlanned);
+  setStat('statHours',totalHours+'h');
+  loadNotes();
+}
+
+function addTH(tr,txt,cls){ const th=document.createElement('th'); th.className=cls; th.textContent=txt; tr.appendChild(th); }
+
+function getType(code){
+  const cu=code.toUpperCase();
+  return HORAIRES[cu]?.type || ABSENCES[cu]?.color || 'matin';
+}
+
+function buildShift(code,mission,col){
+  const cu=code.toUpperCase();
+  const h=HORAIRES[cu], a=ABSENCES[cu];
+  const textCol=col.text;
+
+  let timeLine='', footerCode=code, hrs='';
+  if(h){
+    // For coupure, show on two lines
+    timeLine=h.time.replace(' / ','<br>');
+    hrs=h.hours;
+  } else if(a){
+    timeLine=`<span style="font-size:13px;font-weight:800">${code}</span><br><span style="font-size:9px;font-weight:600;opacity:.75">${a.label}</span>`;
+    footerCode='';
+  } else {
+    timeLine=code;
+  }
+
+  return `<div class="shift-inner" style="color:${textCol}">
+    <div class="shift-time-main">${timeLine}</div>
+    <div class="shift-mission">${mission||''}</div>
+    <div class="shift-footer">
+      <span class="shift-code-sm">${footerCode}</span>
+      ${hrs?`<span class="shift-hrs-sm">${hrs}</span>`:''}
+    </div>
+  </div>`;
+}
+
+// ── DROPDOWN ─────────────────────────────────────────────────
+let extrasMode = false;
+
+function openDD(e, td, isExtra=false) {
+  e.stopPropagation(); activeCell=td; selectedCode=null; extrasMode=isExtra;
+  const key=td.dataset.key, ex=planning[key];
+  document.getElementById('ddContext').innerHTML=`<b>${td.dataset.empname}</b> — ${td.dataset.dayname}`;
+  document.getElementById('ddSearch').value='';
+  document.getElementById('ddMission').value=ex?.mission||'';
+  selectedCode=null;
+  document.getElementById('ddWeekRow').classList.remove('visible');
+  document.getElementById('ddPeriodRow').classList.remove('visible');
+  // Pre-fill period dates with current week
+  const clickedDate = td.dataset.key.split('_')[1];
+  document.getElementById('ddPeriodStart').value = clickedDate || '';
+  document.getElementById('ddPeriodEnd').value   = clickedDate || '';
+  filterItems('');
+
+  const popup=document.getElementById('ddPopup');
+  popup.style.display='flex';
+  popup.style.visibility='hidden';
+
+  const r=td.getBoundingClientRect();
+  const popH=Math.min(popup.scrollHeight, 520);
+  const popW=340;
+  const margin=8;
+
+  // Horizontal : caler à gauche de la case, sans dépasser à droite ni à gauche
+  let left=r.left;
+  if(left+popW>window.innerWidth-margin) left=window.innerWidth-popW-margin;
+  if(left<margin) left=margin;
+
+  // Vertical : sous la case si ça rentre, sinon au-dessus, sinon recadré
+  let top=r.bottom+4;
+  if(top+popH>window.innerHeight-margin){
+    top=r.top-popH-4;
+  }
+  if(top<margin) top=margin;
+
+  popup.style.left=left+'px';
+  popup.style.top=top+'px';
+  popup.style.visibility='visible';
+  document.getElementById('ddOverlay').style.display='block';
+  setTimeout(()=>document.getElementById('ddSearch').focus(),50);
+}
+
+function closeDropdown(){
+  document.getElementById('ddPopup').style.display='none';
+  document.getElementById('ddOverlay').style.display='none';
+  document.getElementById('ddWeekRow').classList.remove('visible');
+  document.getElementById('ddPeriodRow').classList.remove('visible');
+  activeCell=null; selectedCode=null;
+}
+
+// Codes d'absence longue durée — le jour férié NE s'applique PAS
+const ABSENCE_LONGUE = new Set(['CMAL','CMAT','AT','MAL']);
+
+// Codes for which "Appliquer à la semaine" is available
+const WEEK_APPLY_CODES = new Set(['CMAL','CMAT','AT','MAL','GCP','FORIN','FOREX','ECOLE']);
+
+// Codes for which period selector is also available
+const PERIOD_APPLY_CODES = new Set(['CMAL','CMAT','AT','MAL','GCP']);
+
+// Jours fériés 2025 et 2026
+const JOURS_FERIES_2026 = new Set([
+  // 2025
+  '2025-01-01','2025-04-21','2025-05-01','2025-05-08',
+  '2025-05-29','2025-06-09','2025-07-14','2025-08-15',
+  '2025-11-01','2025-11-11','2025-12-25',
+  // 2026
+  '2026-01-01','2026-04-06','2026-05-01','2026-05-08',
+  '2026-05-14','2026-05-25','2026-07-14','2026-08-15',
+  '2026-11-01','2026-11-11','2026-12-25',
+]);
+
+function showHidePeriodRow(code) {
+  const showWeek   = code && WEEK_APPLY_CODES.has(code.toUpperCase());
+  const showPeriod = code && PERIOD_APPLY_CODES.has(code.toUpperCase());
+  document.getElementById('ddWeekRow').classList.toggle('visible', showWeek);
+  document.getElementById('ddPeriodRow').classList.toggle('visible', showPeriod);
+}
+
+function applyToPeriod() {
+  if (!activeCell || !selectedCode) return;
+  const empId  = activeCell.dataset.key.split('_')[0];
+  const mission = document.getElementById('ddMission').value.trim().toUpperCase();
+  const startStr = document.getElementById('ddPeriodStart').value;
+  const endStr   = document.getElementById('ddPeriodEnd').value;
+
+  if (!startStr || !endStr) { showToast('⚠ Veuillez saisir une date de début et de fin'); return; }
+  if (startStr > endStr)    { showToast('⚠ La date de début doit être avant la date de fin'); return; }
+
+  const start = new Date(startStr + 'T00:00:00');
+  const end   = new Date(endStr   + 'T00:00:00');
+  let count = 0;
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+    const dStr  = localDateStr(d);
+    const dow   = d.getDay(); // 0=dim, 6=sam
+    const key   = `${empId}_${dStr}`;
+
+    if (dow === 0 || dow === 6) {
+      // Samedi ou Dimanche → REPO
+      planning[key] = { code:'REPO', mission:'' };
+    } else if (JOURS_FERIES_2026.has(dStr) && !ABSENCE_LONGUE.has(selectedCode.toUpperCase())) {
+      // Jour férié en semaine → CPFER (sauf si absence longue durée : maladie, AT, maternité)
+      planning[key] = { code:'CPFER', mission:'' };
+    } else {
+      // Jour travaillé ou absence longue durée (même sur jour férié) → code sélectionné
+      planning[key] = { code: selectedCode, mission };
+      count++;
+    }
+  }
+
+  closeDropdown();
+  render();
+  showToast(`✓ ${selectedCode} appliqué sur ${count} jour(s) · CPFER posé sur les jours fériés`);
+}
+
+function filterItems(q){
+  q=q.toLowerCase().trim();
+  const body=document.getElementById('ddBody'); body.innerHTML='';
+  filteredItems=[]; activeIndex=-1;
+
+  const all=[
+    ...Object.entries(HORAIRES).map(([c,i])=>({code:c,label:i.time,hours:i.hours,type:i.type})),
+    ...(extrasMode ? [] : Object.entries(ABSENCES).map(([c,i])=>({code:c,label:i.label,hours:null,type:i.color}))),
+  ];
+  const matches=all.filter(it=>!q||it.code.toLowerCase().includes(q)||it.label.toLowerCase().includes(q));
+
+  const groups={
+    matin:   {emoji:'🌅',label:'MATIN',items:[]},
+    soir:    {emoji:'🌇',label:'SOIR',items:[]},
+    nuit:    {emoji:'🌙',label:'NUIT',items:[]},
+    coupure: {emoji:'⚡',label:'COUPURE',items:[]},
+    conge:   {emoji:'✅',label:'CONGÉS & RÉCUP',items:[]},
+    repos:   {emoji:'💤',label:'REPOS',items:[]},
+    absence: {emoji:'🚨',label:'ABSENCES',items:[]},
+  };
+  matches.forEach(it=>{ if(groups[it.type]) groups[it.type].items.push(it); });
+
+  let idx=0;
+  Object.entries(groups).forEach(([gk,g])=>{
+    if(!g.items.length) return;
+    const lbl=document.createElement('div'); lbl.className='dd-group-lbl';
+    lbl.textContent=`${g.emoji} ${g.label}`; body.appendChild(lbl);
+    const col=TYPE_COLOR[gk]||TYPE_COLOR.matin;
+    g.items.forEach(it=>{
+      filteredItems.push(it);
+      const el=document.createElement('div');
+      el.className='dd-item';
+      const sw=`<div class="item-swatch" style="background:${col.bg};border:1px solid ${col.border}"></div>`;
+      el.innerHTML=`${sw}<span class="item-code">${it.code}</span><span class="item-time">${it.label}</span>${it.hours?`<span class="item-hrs">${it.hours}h</span>`:''}`;
+      el.addEventListener('click',()=>{
+        selectedCode=it.code;
+        activeIndex=filteredItems.indexOf(it);
+        showHidePeriodRow(it.code);
+        highlightActive();
+      });
+      el.addEventListener('dblclick',()=>{ selectedCode=it.code; applySelection(); });
+      body.appendChild(el); idx++;
+    });
+  });
+
+  if(!filteredItems.length) body.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:12px">Aucun résultat</div>';
+
+  // Update week/period row visibility based on currently selected code
+  showHidePeriodRow(selectedCode);
+
+  highlightActive();
+}
+
+function applyToWeek(){
+  if(!activeCell || !selectedCode) return;
+  const empId = activeCell.dataset.key.split('_')[0];
+  const mission = document.getElementById('ddMission').value.trim().toUpperCase();
+  const absCol = TYPE_COLOR['absence'];
+  const repoCol = TYPE_COLOR['repos'];
+
+  // Lun(0)→Ven(4) : absence code, Sam(5)+Dim(6) : REPO
+  for(let di=0; di<7; di++){
+    const key = getKey(empId, di);
+    if(di <= 4){
+      planning[key] = { code: selectedCode, mission };
+    } else {
+      planning[key] = { code: 'REPO', mission: '' };
+    }
+  }
+
+  closeDropdown();
+  render();
+  showToast(`✓ ${selectedCode} appliqué Lun→Ven + REPO Sam/Dim`);
+}
+
+function highlightActive(){
+  document.querySelectorAll('.dd-item').forEach((el,i)=>{
+    el.classList.toggle('active', i===activeIndex && activeIndex>=0);
+    if(i===activeIndex && activeIndex>=0) el.scrollIntoView({block:'nearest'});
+  });
+}
+
+function handleKey(e){
+  if(e.key==='ArrowDown'){ activeIndex=Math.min(activeIndex+1,filteredItems.length-1); if(activeIndex<0)activeIndex=0; selectedCode=filteredItems[activeIndex]?.code; showHidePeriodRow(selectedCode); highlightActive(); e.preventDefault(); }
+  if(e.key==='ArrowUp'){   activeIndex=Math.max(activeIndex-1,-1); selectedCode=activeIndex>=0?filteredItems[activeIndex]?.code:null; showHidePeriodRow(selectedCode); highlightActive(); e.preventDefault(); }
+  if(e.key==='Enter'){ if(selectedCode||document.getElementById('ddMission').value) applySelection(); e.preventDefault(); }
+  if(e.key==='Escape') closeDropdown();
+}
+
+function applySelection(){
+  if(!activeCell) return;
+  const key=activeCell.dataset.key;
+  const mission=document.getElementById('ddMission').value.trim().toUpperCase();
+  const codeToApply=selectedCode||(planning[key]?.code);
+
+  if(codeToApply){
+    planning[key]={code:codeToApply, mission};
+    const type=getType(codeToApply), col=TYPE_COLOR[type]||TYPE_COLOR.matin;
+    activeCell.className='shift-cell';
+    activeCell.style.background=col.bg;
+    activeCell.style.borderLeft=`3px solid ${col.border}`;
+    activeCell.innerHTML=buildShift(codeToApply,mission,col);
+  }
+  closeDropdown();
+  if(currentTab==='main') render(); else renderDynPlan(currentTab);
+  if(code)showToast(codeToApply?`✓ ${codeToApply}${mission?' — '+mission:''}`:'✓ Mis à jour');
+}
+
+function clearShift(){
+  if(!activeCell) return;
+  delete planning[activeCell.dataset.key];
+  closeDropdown();
+  if(currentTab==='main') render(); else renderDynPlan(currentTab);
+}
+
+function updateStats(){
+  let tp=0, th=0;
+  TEAMS.forEach(team=>team.employees.forEach(emp=>{
+    for(let i=0;i<7;i++){
+      const v=planning[getKey(emp.id,i)];
+      if(v?.code){ tp++; const inf=HORAIRES[v.code.toUpperCase()]||ABSENCES[v.code.toUpperCase()]; if(inf?.hours) th+=inf.hours; }
+    }
+  }));
+  document.getElementById('statPlanned').textContent=tp;
+  document.getElementById('statHours').textContent=th+'h';
+}
+
+// ── SAVE / LOAD ───────────────────────────────────────────────
+function saveData(){
+  try{ localStorage.setItem('planning_v2',JSON.stringify({planning,at:new Date().toISOString()})); showToast('✓ Planning enregistré'); }
+  catch(e){ showToast('⚠ Erreur de sauvegarde'); }
+}
+function loadData(){
+  try{ const r=localStorage.getItem('planning_v2'); if(r){ const d=JSON.parse(r); planning=d.planning||{}; } }
+  catch(e){}
+}
+function showToast(msg){
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2500);
+}
+
+// ── MINI CALENDAR ────────────────────────────────────────────
+let calDate = new Date(); // month currently displayed in calendar
+
+function toggleCal(e) {
+  e.stopPropagation();
+  const popup = document.getElementById('calPopup');
+  const overlay = document.getElementById('calOverlay');
+  if (popup.style.display === 'block') { closeCal(); return; }
+
+  // Position below the calendar button
+  const btn = e.currentTarget;
+  const r = btn.getBoundingClientRect();
+  let left = r.right - 260;
+  let top  = r.bottom + 6;
+  if (left < 8) left = 8;
+  if (top + 320 > window.innerHeight) top = r.top - 326;
+
+  popup.style.left = left + 'px';
+  popup.style.top  = top  + 'px';
+
+  // Display current week's month
+  calDate = new Date(currentWeekStart);
+  renderCal();
+
+  popup.style.display = 'block';
+  overlay.style.display = 'block';
+}
+
+function closeCal() {
+  document.getElementById('calPopup').style.display = 'none';
+  document.getElementById('calOverlay').style.display = 'none';
+}
+
+function calPrevMonth() {
+  calDate.setMonth(calDate.getMonth() - 1);
+  renderCal();
+}
+
+function calNextMonth() {
+  calDate.setMonth(calDate.getMonth() + 1);
+  renderCal();
+}
+
+function renderCal() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const year  = calDate.getFullYear();
+  const month = calDate.getMonth();
+
+  document.getElementById('calTitle').textContent =
+    new Date(year, month, 1).toLocaleDateString('fr-FR', {month:'long', year:'numeric'}).toUpperCase();
+
+  const grid = document.getElementById('calDays');
+  grid.innerHTML = '';
+
+  // First day of month (Monday-based)
+  const firstDay = new Date(year, month, 1);
+  let startDow = firstDay.getDay(); // 0=Sun
+  if (startDow === 0) startDow = 7;
+  startDow--; // 0=Mon
+
+  // Last day of month
+  const lastDay = new Date(year, month + 1, 0).getDate();
+
+  // Empty slots before
+  for (let i = 0; i < startDow; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= lastDay; d++) {
+    const date = new Date(year, month, d);
+    const dStr = localDateStr(date);
+    const mon  = getMonday(date);
+    const monStr = localDateStr(mon);
+    const curMonStr = localDateStr(currentWeekStart);
+
+    const el = document.createElement('div');
+    let cls = 'cal-day';
+    if (localDateStr(date) === localDateStr(today)) cls += ' today';
+    else if (monStr === curMonStr) cls += ' cur-week';
+    if (date.getMonth() !== month) cls += ' other-month';
+    if (JOURS_FERIES_2026.has(dStr)) cls += ' ferie';
+    el.className = cls;
+    el.textContent = d;
+    el.addEventListener('click', () => goToDate(date));
+    grid.appendChild(el);
+  }
+}
+
+function goToDate(date) {
+  currentWeekStart = getMonday(date);
+  closeCal();
+  render();
+}
+
+// ── SYSTÈME D'ONGLETS DYNAMIQUES ─────────────────────────────
+// currentTab : 'main' | planningId
+let currentTab = 'main';
+let newPlanType = 'extra'; // pour la modal de création
+
+// EXTRA_PLANNINGS : array de plannings dynamiques
+// { id, name, type:'extra'|'fixed', teams:[{id, name, employees:[{id,name,post,matricule}]}] }
+let EXTRA_PLANNINGS = [];
+
+function loadExtraPlannings() {
+  try {
+    const s = localStorage.getItem('extra_plannings');
+    EXTRA_PLANNINGS = s ? JSON.parse(s) : [];
+  } catch(e) { EXTRA_PLANNINGS = []; }
+}
+function saveExtraPlannings() { localStorage.setItem('extra_plannings', JSON.stringify(EXTRA_PLANNINGS)); }
+
+function renderTabs() {
+  const bar = document.getElementById('tabsBar');
+  bar.innerHTML = '';
+
+  // Onglet principal
+  const t0 = document.createElement('div');
+  t0.className = 'tab' + (currentTab==='main' ? ' active' : '');
+  t0.innerHTML = '📋 Planning Équipe';
+  t0.onclick = () => switchTab('main');
+  bar.appendChild(t0);
+
+  // Onglets plannings dynamiques
+  EXTRA_PLANNINGS.forEach(plan => {
+    const t = document.createElement('div');
+    t.className = 'tab' + (currentTab===plan.id ? ' active' : '');
+    const icon = plan.type === 'extra' ? '⭐' : '📋';
+    t.innerHTML = `${icon} ${plan.name} <span class="tab-close" onclick="deletePlanning('${plan.id}',event)">✕</span>`;
+    t.onclick = (e) => { if(!e.target.classList.contains('tab-close')) switchTab(plan.id); };
+    bar.appendChild(t);
+  });
+
+  // Bouton + ajouter
+  const tAdd = document.createElement('button');
+  tAdd.className = 'tab-add';
+  tAdd.title = 'Ajouter un planning';
+  tAdd.innerHTML = '＋';
+  tAdd.onclick = openCreatePlan;
+  bar.appendChild(tAdd);
+}
+
+function switchTab(tabId) {
+  currentTab = tabId;
+  const isMain = tabId === 'main';
+  document.getElementById('mainContent').style.display   = isMain ? '' : 'none';
+  document.getElementById('dynPlanContent').style.display = isMain ? 'none' : '';
+  document.getElementById('legendBar').style.display     = isMain ? '' : '';
+  document.getElementById('notesBar') && (document.getElementById('notesBar').style.display = '');
+  renderTabs();
+  if (isMain) { render(); }
+  else { renderDynPlan(tabId); }
+}
+
+// ── MODAL CRÉER UN PLANNING ───────────────────────────────────
+function openCreatePlan() {
+  newPlanType = 'extra';
+  document.getElementById('newPlanName').value = '';
+  selectPlanType('extra');
+  document.getElementById('createPlanModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('newPlanName').focus(), 50);
+}
+function closeCreatePlan() { document.getElementById('createPlanModal').style.display = 'none'; }
+function selectPlanType(type) {
+  newPlanType = type;
+  document.getElementById('typeCard-extra').classList.toggle('selected', type==='extra');
+  document.getElementById('typeCard-fixed').classList.toggle('selected', type==='fixed');
+}
+function confirmCreatePlan() {
+  const name = document.getElementById('newPlanName').value.trim();
+  if (!name) { document.getElementById('newPlanName').focus(); return; }
+  const plan = {
+    id: genId('plan'),
+    name: name.toUpperCase(),
+    type: newPlanType,
+    teams: [{ id: genId('pt'), name: 'SECTION 1', employees: [] }]
+  };
+  EXTRA_PLANNINGS.push(plan);
+  saveExtraPlannings();
+  closeCreatePlan();
+  switchTab(plan.id);
+  showToast(`✓ Planning "${plan.name}" créé`);
+}
+
+function deletePlanning(planId, e) {
+  e.stopPropagation();
+  const plan = EXTRA_PLANNINGS.find(p => p.id === planId);
+  if (!plan) return;
+  if (!confirm(`Supprimer le planning "${plan.name}" et toutes ses données ?`)) return;
+  EXTRA_PLANNINGS = EXTRA_PLANNINGS.filter(p => p.id !== planId);
+  saveExtraPlannings();
+  if (currentTab === planId) switchTab('main');
+  else { renderTabs(); }
+  showToast('Planning supprimé');
+}
+
+// ── RENDU D'UN PLANNING DYNAMIQUE ────────────────────────────
+function renderDynPlan(planId) {
+  const plan = EXTRA_PLANNINGS.find(p => p.id === planId);
+  if (!plan) { switchTab('main'); return; }
+
+  const container = document.getElementById('dynPlanContent');
+  container.innerHTML = '';
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days  = Array.from({length:7},(_,i)=>getDayDate(i));
+  const useRH = plan.type === 'fixed'; // alertes RH pour contrats fixes (futur)
+
+  // Badge type
+  const badge = document.createElement('div');
+  badge.style.cssText = 'padding:6px 14px;background:' + (plan.type==='extra'?'#fff8e1':'#e8f0ff') + ';border-bottom:2px solid ' + (plan.type==='extra'?'#f9a825':'#3a5cbf') + ';font-size:11px;font-weight:700;color:' + (plan.type==='extra'?'#7a5800':'#253161') + ';font-family:var(--cond);letter-spacing:1px;display:flex;align-items:center;gap:8px;';
+  badge.innerHTML = (plan.type==='extra' ? '⭐ PLANNING EXTRAS — Personnel ponctuel · Vacataires / Intérimaires' : '📋 PLANNING CONTRAT FIXE — CDI / CDD · Règles RH complètes');
+  // Bouton renommer
+  const btnRen = document.createElement('button');
+  btnRen.style.cssText = 'margin-left:auto;background:rgba(37,49,97,.1);border:1px solid rgba(37,49,97,.2);color:#253161;border-radius:3px;cursor:pointer;font-size:10px;font-weight:700;padding:3px 8px;font-family:var(--sans)';
+  btnRen.textContent = '✏ Renommer';
+  btnRen.onclick = () => {
+    const n = prompt('Nouveau nom du planning :', plan.name);
+    if (n && n.trim()) { plan.name = n.trim().toUpperCase(); saveExtraPlannings(); renderTabs(); renderDynPlan(planId); }
+  };
+  badge.appendChild(btnRen);
+  container.appendChild(badge);
+
+  // Sections
+  plan.teams.forEach((team, tIdx) => {
+    const sec = document.createElement('div'); sec.className='team-section';
+    const thd = document.createElement('div'); thd.className='team-header-row';
+    thd.innerHTML = `
+      <span class="team-name-label">${team.name}</span>
+      <button class="btn-team-action" onclick="dynRenameTeam('${planId}',${tIdx})">✏ Renommer</button>
+      <button class="btn-team-action" onclick="dynAddEmp('${planId}',${tIdx})">+ Employé</button>
+      <button class="btn-team-action btn-team-del" onclick="dynDeleteTeam('${planId}',${tIdx})">✕</button>
+    `;
+    sec.appendChild(thd);
+
+    const table = document.createElement('table'); table.className='planning-table';
+    const thead = document.createElement('thead');
+    const trh   = document.createElement('tr');
+    addTH(trh,'Collaborateur','col-name');
+    days.forEach((d,i)=>{
+      const th2=document.createElement('th');
+      const dStr=localDateStr(d);
+      const isF=JOURS_FERIES_2026.has(dStr), isT=localDateStr(d)===localDateStr(today);
+      let cls='col-day';
+      if(isT&&isF)cls+=' today-ferie'; else if(isT)cls+=' today-col'; else if(isF)cls+=' ferie-col';
+      th2.className=cls;
+      th2.innerHTML=`<span class="day-name-th">${DAYS[i]}</span><span class="day-date-th">${d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</span>`;
+      trh.appendChild(th2);
+    });
+    addTH(trh,'Total','col-total');
+    thead.appendChild(trh); table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    if (team.employees.length === 0) {
+      const trE=document.createElement('tr'); const tdE=document.createElement('td');
+      tdE.colSpan=9; tdE.style.cssText='padding:14px;text-align:center;color:#8891a0;font-size:12px;font-style:italic;';
+      tdE.textContent='Aucun employé — cliquez sur "+ Employé" pour en ajouter';
+      trE.appendChild(tdE); tbody.appendChild(trE);
+    }
+
+    team.employees.forEach((emp, eIdx) => {
+      const empKey = `dyn_${planId}_${emp.id}`;
+      const tr = document.createElement('tr'); tr.className='emp-row';
+      const parts = (emp.name||'').split(' ');
+      const tdN = document.createElement('td'); tdN.className='name-cell';
+      tdN.innerHTML = `
+        <button class="btn-del-emp" onclick="dynDelEmp('${planId}',${tIdx},${eIdx})">✕</button>
+        <div class="emp-first">${parts[0]||''}</div>
+        <div class="emp-last">${parts.slice(1).join(' ')||''}</div>
+        <div class="emp-post">${emp.post||''}</div>
+        ${emp.matricule?`<div class="emp-post" style="color:#8891a0">Matr. ${emp.matricule}</div>`:''}
+        <button class="btn-dup" onclick="dynDupPrev('${planId}','${emp.id}',event)">↩ Sem. préc.</button>
+      `;
+      tr.appendChild(tdN);
+
+      let wkHours=0;
+      days.forEach((_,di)=>{
+        const key=`${empKey}_${localDateStr(getDayDate(di))}`;
+        const val=planning[key]; const code=val?.code||'', mission=val?.mission||'';
+        const info=code?(HORAIRES[code.toUpperCase()]||ABSENCES[code.toUpperCase()]):null;
+        if(info?.hours) wkHours+=info.hours;
+        const td=document.createElement('td');
+        td.className='shift-cell'+(code?'':' empty-cell');
+        td.dataset.key=key; td.dataset.empname=emp.name||''; td.dataset.dayname=DAYS[di];
+        const useAbs = plan.type === 'fixed'; // extras n'ont pas de codes absence
+        if(code){
+          const type=getType(code),col=TYPE_COLOR[type]||TYPE_COLOR.matin;
+          td.style.background=col.bg; td.style.borderLeft=`3px solid ${col.border}`;
+          td.innerHTML=buildShift(code,mission,col);
+          td.setAttribute('draggable','true');
+        } else { td.innerHTML=`<div class="plus-hint">+</div>`; }
+        td.addEventListener('click', e=>openDD(e,td,!useAbs));
+        td.addEventListener('dragstart',e=>{ if(!code){e.preventDefault();return;} dragSource={key,code,mission}; td.classList.add('dragging'); e.dataTransfer.effectAllowed='copy'; });
+        td.addEventListener('dragend',()=>td.classList.remove('dragging'));
+        td.addEventListener('dragover',e=>{ if(!dragSource||dragSource.key===key)return; e.preventDefault(); td.classList.add('drag-over'); });
+        td.addEventListener('dragleave',()=>td.classList.remove('drag-over'));
+        td.addEventListener('drop',e=>{ e.preventDefault(); td.classList.remove('drag-over'); if(!dragSource||dragSource.key===key)return; planning[key]={code:dragSource.code,mission:dragSource.mission}; dragSource=null; renderDynPlan(planId); showToast('✓ Horaire copié'); });
+        tr.appendChild(td);
+      });
+
+      const tdT=document.createElement('td');
+      tdT.className='total-cell'+(wkHours===0?' zero':'');
+      tdT.innerHTML=wkHours>0?`<span class="total-hrs">${wkHours}</span><span class="total-lbl">h</span>`:'<span style="color:#c8d0e0;font-size:14px">—</span>';
+      tr.appendChild(tdT);
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+
+    // Drop zone pour glisser un employé entre sections
+    tbody.addEventListener('dragover',e=>{ if(!empDragSource)return; e.preventDefault(); tbody.style.outline='2px dashed #4a7adf'; });
+    tbody.addEventListener('dragleave',()=>{ tbody.style.outline=''; });
+    tbody.addEventListener('drop',e=>{
+      e.preventDefault(); tbody.style.outline='';
+      if(!empDragSource||empDragSource.planId!==planId) return;
+      const {srcTeam,srcEmp,emp} = empDragSource;
+      if(srcTeam===tIdx) return;
+      plan.teams[srcTeam].employees.splice(srcEmp,1);
+      plan.teams[tIdx].employees.push(emp);
+      saveExtraPlannings(); empDragSource=null; renderDynPlan(planId);
+      showToast(`✓ ${emp.name} déplacé`);
+    });
+
+    sec.appendChild(table); container.appendChild(sec);
+  });
+
+  // Bouton ajouter section
+  const btnSec=document.createElement('button'); btnSec.className='btn-add-section';
+  btnSec.textContent='+ Ajouter une section'; btnSec.onclick=()=>dynAddTeam(planId);
+  container.appendChild(btnSec);
+}
+
+// ── GESTION SECTIONS ET EMPLOYÉS PLANNINGS DYNAMIQUES ─────────
+function dynAddTeam(planId) {
+  const plan=EXTRA_PLANNINGS.find(p=>p.id===planId); if(!plan) return;
+  const name=prompt('Nom de la nouvelle section :'); if(!name||!name.trim()) return;
+  plan.teams.push({id:genId('pt'),name:name.trim().toUpperCase(),employees:[]});
+  saveExtraPlannings(); renderDynPlan(planId); showToast('✓ Section créée');
+}
+function dynRenameTeam(planId,tIdx) {
+  const plan=EXTRA_PLANNINGS.find(p=>p.id===planId); if(!plan) return;
+  const name=prompt('Nouveau nom :',plan.teams[tIdx].name); if(!name||!name.trim()) return;
+  plan.teams[tIdx].name=name.trim().toUpperCase(); saveExtraPlannings(); renderDynPlan(planId);
+}
+function dynDeleteTeam(planId,tIdx) {
+  const plan=EXTRA_PLANNINGS.find(p=>p.id===planId); if(!plan) return;
+  if(!confirm(`Supprimer "${plan.teams[tIdx].name}" ?`)) return;
+  plan.teams.splice(tIdx,1); saveExtraPlannings(); renderDynPlan(planId);
+}
+function dynAddEmp(planId,tIdx) {
+  const plan=EXTRA_PLANNINGS.find(p=>p.id===planId); if(!plan) return;
+  openEmpModal('Ajouter un employé','all',(emp)=>{
+    plan.teams[tIdx].employees.push({id:emp.id,name:emp.name,post:emp.post,matricule:emp.matricule||''});
+    saveExtraPlannings(); renderDynPlan(planId); showToast(`✓ ${emp.name} ajouté`);
+  });
+}
+function dynDelEmp(planId,tIdx,eIdx) {
+  const plan=EXTRA_PLANNINGS.find(p=>p.id===planId); if(!plan) return;
+  const emp=plan.teams[tIdx].employees[eIdx];
+  if(!confirm(`Retirer ${emp.name} ?`)) return;
+  plan.teams[tIdx].employees.splice(eIdx,1); saveExtraPlannings(); renderDynPlan(planId);
+}
+function dynDupPrev(planId,empId,e) {
+  e.stopPropagation();
+  const empKey=`dyn_${planId}_${empId}`;
+  let copied=0;
+  for(let di=0;di<7;di++){
+    const prev=addDays(getDayDate(di),-7);
+    const pk=`${empKey}_${localDateStr(prev)}`;
+    const pv=planning[pk];
+    if(pv?.code){ planning[`${empKey}_${localDateStr(getDayDate(di))}`]={code:pv.code,mission:pv.mission||''}; copied++; }
+  }
+  if(copied>0){ renderDynPlan(planId); showToast(`↩ ${copied} jour(s) dupliqué(s)`); }
+  else showToast('⚠ Aucun horaire la semaine précédente');
+}
+
+// ── NOTES DE SEMAINE ─────────────────────────────────────────
+function saveNotes() {
+  const wk = localDateStr(currentWeekStart);
+  const val = document.getElementById('notesInput').value;
+  const saved = JSON.parse(localStorage.getItem('planning_notes')||'{}');
+  saved[wk] = val;
+  localStorage.setItem('planning_notes', JSON.stringify(saved));
+}
+
+function loadNotes() {
+  const wk = localDateStr(currentWeekStart);
+  const saved = JSON.parse(localStorage.getItem('planning_notes')||'{}');
+  document.getElementById('notesInput').value = saved[wk] || '';
+}
+
+// ── COMPTEUR COUVERTS PDJ ────────────────────────────────────
+const PDJ_DAYS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+
+function savePDJ(key, val) {
+  const saved = JSON.parse(localStorage.getItem('planning_pdj')||'{}');
+  if (val) saved[key] = parseInt(val);
+  else delete saved[key];
+  localStorage.setItem('planning_pdj', JSON.stringify(saved));
+}
+
+// ── SUIVI WEEK-ENDS ──────────────────────────────────────────
+// Compte les week-ends de REPOS — règles :
+// 1. La semaine doit être planifiée (au moins 1 jour rempli Lun→Ven)
+// 2. Sam+Dim en REPO/RHEB ou vide → compte
+// 3. Si Sam ou Dim en GCP, CMAL, AT, CMAT, MAL → ne compte PAS
+// 4. Uniquement les semaines passées (avant aujourd'hui)
+const WE_EXCLUSION = new Set(['GCP','CMAL','AT','CMAT','MAL']);
+
+function countWeekends(empId) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const yearStart = new Date(currentWeekStart.getFullYear(), 0, 1);
+  const firstMon = getMonday(yearStart);
+
+  let count = 0;
+  for (let mon = new Date(firstMon); mon < today; mon.setDate(mon.getDate()+7)) {
+    // Vérifier que la semaine est planifiée (au moins 1 jour Lun→Ven rempli)
+    let weekPlanned = false;
+    for (let di = 0; di < 5; di++) {
+      const d = new Date(mon); d.setDate(d.getDate()+di);
+      if (planning[`${empId}_${localDateStr(d)}`]?.code) { weekPlanned = true; break; }
+    }
+    if (!weekPlanned) continue;
+
+    // Samedi et Dimanche
+    const sat = new Date(mon); sat.setDate(sat.getDate()+5);
+    const sun = new Date(mon); sun.setDate(sun.getDate()+6);
+    const satCode = planning[`${empId}_${localDateStr(sat)}`]?.code?.toUpperCase() || '';
+    const sunCode = planning[`${empId}_${localDateStr(sun)}`]?.code?.toUpperCase() || '';
+
+    // Exclusion si CP ou absence longue durée
+    if (WE_EXCLUSION.has(satCode) || WE_EXCLUSION.has(sunCode)) continue;
+
+    // Week-end de repos = REPO, RHEB ou case vide
+    const satRest = !satCode || satCode==='REPO' || satCode==='RHEB';
+    const sunRest = !sunCode || sunCode==='REPO' || sunCode==='RHEB';
+    if (satRest && sunRest) count++;
+  }
+  return count;
+}
+
+// ── BASE DE DONNÉES EMPLOYÉS ─────────────────────────────────
+// Partagée entre planning principal et extras
+// Chaque employé : { id, name, post, matricule, type:'permanent'|'extra' }
+
+const DEFAULT_EMP_DB = [
+  // Permanents — repris de TEAMS
+  {id:"e1",  name:"Antoine FORSTER",       post:"Resp. Restauration",       matricule:"", type:"permanent"},
+  {id:"e2",  name:"Christophe MOLINAROLI", post:"Assist. Resp. Restauration",matricule:"", type:"permanent"},
+  {id:"e3",  name:"Franck CASTAING",       post:"Maître d'hôtel",           matricule:"", type:"permanent"},
+  {id:"e4",  name:"Patricia JULIEN",       post:"Maître d'hôtel",           matricule:"", type:"permanent"},
+  {id:"e5",  name:"Christophe SERRES",     post:"Assist. Maître d'hôtel",   matricule:"", type:"permanent"},
+  {id:"e6",  name:"Nicolas CHIOTTI",       post:"Chef de Rang",             matricule:"", type:"permanent"},
+  {id:"e7",  name:"Mouna MELITTI",         post:"Chef de Rang",             matricule:"", type:"permanent"},
+  {id:"e8",  name:"Florian DOCHIER",       post:"Chef Barman",              matricule:"", type:"permanent"},
+  {id:"e9",  name:"Cesar CALLEJAS CALA",   post:"Barmaid",                  matricule:"", type:"permanent"},
+  {id:"e10", name:"Laurie CHALOPIN",       post:"Barmaid",                  matricule:"", type:"permanent"},
+  {id:"e11", name:"Fidèle SOUMAILA",       post:"Serveuse",                 matricule:"", type:"permanent"},
+  {id:"e12", name:"Youssoufa MOINDJIE",    post:"Équipier",                 matricule:"", type:"permanent"},
+  {id:"e13", name:"Bacar M'MADI",          post:"Équipier",                 matricule:"", type:"permanent"},
+  {id:"e14", name:"Abdel ZAARAOUI",        post:"Employé Polyvalent",       matricule:"", type:"permanent"},
+  {id:"e15", name:"Philippe POETTE",       post:"Chef de Cuisine",          matricule:"", type:"permanent"},
+  {id:"e16", name:"Morgan FRAISSE",        post:"Second de Cuisine",        matricule:"", type:"permanent"},
+  {id:"e17", name:"Aboubaker REGAGBA",     post:"Chef de Partie",           matricule:"", type:"permanent"},
+  {id:"e18", name:"Lucas COURBIS",         post:"Chef de Partie",           matricule:"", type:"permanent"},
+  {id:"e19", name:"Halifa HASSANI",        post:"Commis de Cuisine",        matricule:"", type:"permanent"},
+  {id:"e20", name:"Mina ZEMRINI",          post:"Resp. Buffet PDJ",         matricule:"", type:"permanent"},
+  {id:"e21", name:"Sébastien STRAVATO",    post:"Magazinier",               matricule:"", type:"permanent"},
+  {id:"e22", name:"M'Madina MBOUSSOURI",   post:"Plongeur",                 matricule:"", type:"permanent"},
+  {id:"e23", name:"Youssoufa M'BAN PANDZA",post:"Agent d'entretien",        matricule:"", type:"permanent"},
+];
+
+let EMP_DB = [];
+
+function loadEmpDB() {
+  try {
+    const s = localStorage.getItem('emp_db');
+    EMP_DB = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_EMP_DB));
+  } catch(e) { EMP_DB = JSON.parse(JSON.stringify(DEFAULT_EMP_DB)); }
+}
+function saveEmpDB() { localStorage.setItem('emp_db', JSON.stringify(EMP_DB)); }
+
+// ── MODAL SÉLECTION EMPLOYÉ ───────────────────────────────────
+let empModalCallback = null;  // fonction appelée quand un employé est sélectionné
+let empModalFilter   = 'all'; // 'all' | 'permanent' | 'extra'
+
+function openEmpModal(title, filterType, callback) {
+  empModalCallback = callback;
+  empModalFilter   = filterType || 'all';
+  document.getElementById('empModalTitle').textContent = title || 'Ajouter un employé';
+  document.getElementById('empModalSearch').value = '';
+  document.getElementById('empModal').style.display = 'flex';
+  filterEmpModal('');
+  setTimeout(()=>document.getElementById('empModalSearch').focus(), 50);
+}
+
+function closeEmpModal() {
+  document.getElementById('empModal').style.display = 'none';
+  empModalCallback = null;
+}
+
+function filterEmpModal(q) {
+  q = q.toLowerCase().trim();
+  const body = document.getElementById('empModalBody');
+  body.innerHTML = '';
+
+  const list = EMP_DB.filter(e =>
+    (empModalFilter === 'all' || e.type === empModalFilter) &&
+    (!q || e.name.toLowerCase().includes(q) || e.post.toLowerCase().includes(q) || (e.matricule||'').toLowerCase().includes(q))
+  );
+
+  if (!list.length) {
+    body.innerHTML = `<div class="modal-empty">Aucun résultat.<br><small>Utilisez "Saisie manuelle" pour ajouter un nouvel employé.</small></div>`;
+    return;
+  }
+
+  list.forEach(emp => {
+    const initials = emp.name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    const item = document.createElement('div');
+    item.className = 'modal-emp-item';
+    item.innerHTML = `
+      <div class="modal-emp-avatar">${initials}</div>
+      <div style="flex:1">
+        <div class="modal-emp-name">${emp.name}</div>
+        <div class="modal-emp-post">${emp.post}</div>
+        ${emp.matricule ? `<div class="modal-emp-mat">Matr. ${emp.matricule}</div>` : ''}
+      </div>
+      <span style="font-size:10px;color:${emp.type==='extra'?'#e08020':'#253161'};font-weight:700;font-family:var(--cond)">
+        ${emp.type==='extra'?'EXTRA':'PERMANENT'}
+      </span>
+    `;
+    item.addEventListener('click', () => {
+      if (empModalCallback) empModalCallback({ ...emp });
+      closeEmpModal();
+    });
+    body.appendChild(item);
+  });
+}
+
+function addEmpManually() {
+  closeEmpModal();
+  const name = prompt('Nom complet (ex: DUPONT Jean) :');
+  if (!name || !name.trim()) return;
+  const post = prompt('Poste :') || '';
+  const matricule = prompt('Matricule (optionnel) :') || '';
+  const type = empModalFilter === 'extra' ? 'extra' : 'permanent';
+  const newEmp = { id: genId('e'), name: name.trim(), post: post.trim(), matricule: matricule.trim(), type };
+  EMP_DB.push(newEmp);
+  saveEmpDB();
+  if (empModalCallback) empModalCallback({ ...newEmp });
+}
+
+// ── Remplacer addEmployee pour utiliser le modal ──────────────
+function addEmployee(teamIdx) {
+  openEmpModal('Ajouter un employé', 'permanent', (emp) => {
+    // Vérifier si déjà dans une section
+    const alreadyIn = TEAMS.some(t => t.employees.some(e => e.id === emp.id));
+    if (alreadyIn) { showToast('⚠ Cet employé est déjà dans le planning'); return; }
+    TEAMS[teamIdx].employees.push({ id: emp.id, name: emp.name, post: emp.post });
+    saveTeams(); render();
+    showToast(`✓ ${emp.name} ajouté`);
+  });
+}
+
+// ── EXPORT PDF ───────────────────────────────────────────────
+function exportPDF() {
+  window.print();
+}
+
+// ── GESTION SECTIONS & EMPLOYÉS ──────────────────────────────
+function renameTeam(teamIdx) {
+  const newName = prompt('Nouveau nom de la section :', TEAMS[teamIdx].name);
+  if (newName && newName.trim()) {
+    TEAMS[teamIdx].name = newName.trim().toUpperCase();
+    saveTeams(); render();
+  }
+}
+
+function deleteTeam(teamIdx) {
+  const team = TEAMS[teamIdx];
+  if (team.employees.length > 0 && !confirm(`"${team.name}" contient ${team.employees.length} employé(s). Supprimer quand même ?`)) return;
+  TEAMS.splice(teamIdx, 1);
+  saveTeams(); render();
+  showToast('Section supprimée');
+}
+
+function addTeam() {
+  const name = prompt('Nom de la nouvelle section :');
+  if (!name || !name.trim()) return;
+  TEAMS.push({ id: genId('t'), name: name.trim().toUpperCase(), employees: [] });
+  saveTeams(); render();
+  showToast(`✓ Section créée`);
+}
+
+function deleteEmployee(teamIdx, empIdx) {
+  const emp = TEAMS[teamIdx].employees[empIdx];
+  if (!confirm(`Supprimer ${emp.name} du planning ?`)) return;
+  TEAMS[teamIdx].employees.splice(empIdx, 1);
+  saveTeams(); render();
+  showToast(`${emp.name} supprimé`);
+}
+
+function dupPrevWeek(empId, e) {
+  e.stopPropagation();
+  let copied = 0;
+  for (let di = 0; di < 7; di++) {
+    // Jour de la semaine précédente
+    const prevDay = addDays(getDayDate(di), -7);
+    const prevKey = `${empId}_${localDateStr(prevDay)}`;
+    const prevVal = planning[prevKey];
+
+    // Jour de la semaine actuelle
+    const curKey = getKey(empId, di);
+
+    if (prevVal?.code) {
+      planning[curKey] = { code: prevVal.code, mission: prevVal.mission || '' };
+      copied++;
+    }
+  }
+  if (copied > 0) {
+    render();
+    showToast(`↩ ${copied} jour(s) dupliqué(s) depuis la semaine précédente`);
+  } else {
+    showToast('⚠ Aucun horaire trouvé la semaine précédente');
+  }
+}
+
+async function tfInit(){
+  if(!await tfDemarrer()) return;
+  const q=document.getElementById('tfqui'); if(q) q.textContent=profil.nom;
+  const doc = await tfCharger();
+  if(doc && doc.contenu){
+    CLES.forEach(k=>{ if(doc.contenu[k]!=null) D[k]=doc.contenu[k]; });
+    if(doc.contenu.codes_horaires) window.CODES_REF = doc.contenu.codes_horaires;
+  }
+  const peut = !!(ECRITURE[MODULE]||{})[profil.role];
+  if(peut) await tfPrendreVerrou();
+  else { jeEdite=false;
+    tfBandeau('<b>Lecture seule</b> — votre fonction ne permet pas de modifier ce planning.','info'); }
+  if(!jeEdite) document.body.classList.add('tf-lecture');
+  if(doc && doc.maj_par_nom)
+    tfEtat('Dernière modification : '+doc.maj_par_nom+' le '+
+           new Date(doc.maj_le).toLocaleString('fr-FR'));
+  loadEmpDB(); loadTeams(); loadExtraPlannings(); loadData(); renderTabs(); render();
+}
+tfInit();
+</script>
+</body>
+</html>
