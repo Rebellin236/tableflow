@@ -162,16 +162,18 @@ let sb = null, moi = null, profil = null;
 const MODULES = [
   {id:'menu_bar',     ic:'🍸', t:'Carte du Bar',        d:'Cartes du Bar 1.13 — français et anglais',
    url:'menu-bar.html'},
-  {id:'menu_banquet', ic:'🍽️', t:'Menus Banquet',       d:'Menus assis, buffets et cocktails',
-   url:'menu-banquet.html'},
+  {id:'menu_banquet', ic:'🍽️', t:'Menus Assis',         d:'Menus servis à table — banquet',
+   url:'menu-assis.html'},
+  {id:'menu_banquet', ic:'🥂', t:'Buffets & Cocktails', d:'Buffets, cocktails dînatoires, fingers',
+   url:'menu-buffet.html'},
   {id:'room',         ic:'🛏️', t:'Room Directory',      d:'Cartes en chambre — TastyCloud',
    url:'room.html'},
   {id:'staff',        ic:'📋', t:'Planning Personnel',  d:'Planning des équipes et codes horaires',
    url:'planning.html'},
   {id:'activite',     ic:'📅', t:'Activité Restauration', d:'Événements et couverts de la semaine',
-   url:'activite.html'},
+   url:'activite.html', bientot:true},
   {id:'salons',       ic:'🏛️', t:'Planning Salons',     d:'Occupation des salons et séminaires',
-   url:'salons.html'},
+   url:'salons.html', bientot:true},
 ];
 
 // Droits par rôle — MIROIR des règles SQL.
@@ -256,9 +258,15 @@ function afficherApp(){
                 : niveau==='e' ? '<span class="b edi">Édition</span>'
                 :                '<span class="b lec">Lecture</span>';
     const a=document.createElement('a');
-    a.className='mod'; a.href=m.url;
-    a.innerHTML = badge + '<span class="ic">'+m.ic+'</span>'+
-      '<div class="t">'+m.t+'</div><div class="d">'+m.d+'</div>';
+    if(m.bientot){
+      a.className='mod off'; a.href='#';
+      a.innerHTML = '<span class="b lec">Bientôt</span><span class="ic">'+m.ic+'</span>'+
+        '<div class="t">'+m.t+'</div><div class="d">'+m.d+'</div>';
+    } else {
+      a.className='mod'; a.href=m.url;
+      a.innerHTML = badge + '<span class="ic">'+m.ic+'</span>'+
+        '<div class="t">'+m.t+'</div><div class="d">'+m.d+'</div>';
+    }
     g.appendChild(a);
   });
   if(!n) g.innerHTML='<div class="vide">Aucun module ne vous est attribué.<br>'+
