@@ -62,16 +62,74 @@ td.lib.w{background:#FFF8E6;color:#8a7320}
 td.lib small{display:block;font-size:8px;letter-spacing:.04em;font-weight:600;
   color:#A89F8F;text-transform:none;margin-top:1px}
 
-/* pauses : une cellule = nom + nombre */
-.pz{display:flex;flex-direction:column}
-.pz input{font:inherit;border:none;background:none;padding:3px 5px;min-width:0}
-.pz input:focus{outline:2px solid #B8922A;outline-offset:-2px;background:#FFFDF6;position:relative;z-index:3}
-.pz .l{display:flex}
-.pz .nm{flex:1;font-size:10.5px;font-weight:600}
-.pz .nb{width:32px;text-align:center;font-weight:700;font-size:11px;
-  border-left:1px solid #F0EBE0}
-td.wtc{background:#FFFCF2}
+/* grille : 7 colonnes de jours côte à côte */
+.grille7{display:grid;grid-template-columns:repeat(7,1fr);gap:0;
+  border-top:1px solid #E2DACA}
+.cj{border-right:1px solid #E2DACA;display:flex;flex-direction:column}
+.cj:last-child{border-right:none}
+.hj{background:#EDE8DC;padding:5px 8px;text-align:center;
+  border-bottom:1px solid #E2DACA}
+.hj .jn{font-family:'Gelasio',serif;font-size:12.5px;font-weight:700}
+.hj .jd{font-size:9.5px;color:#7A7266;font-weight:600;margin-left:6px}
+.zsec{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#fff;
+  background:#1F1B16;padding:3px 8px;font-weight:700}
+.zsec.pause{background:#B8922A}
+.zsec.midi{background:#A8321F}
 
+/* tableau des pauses du jour */
+table.tj{width:100%;border-collapse:collapse;table-layout:fixed}
+table.tj th,table.tj td{border:1px solid #E2DACA;padding:0}
+table.tj th{font-size:7px;letter-spacing:.02em;color:#7A7266;font-weight:700;
+  padding:2px 1px;text-align:center;background:#F5F1E8;line-height:1.2}
+table.tj th i{font-style:normal;font-size:6px;color:#A89F8F;display:block}
+table.tj th.n{width:36%;text-align:left;padding-left:5px}
+table.tj th.w{background:#FFF8E6;color:#8a7320}
+table.tj td input{width:100%;font:inherit;border:none;background:none;
+  padding:3px 2px;text-align:center;font-size:9.5px;font-weight:700}
+table.tj td.n input{text-align:left;padding-left:5px;font-size:9px}
+table.tj td.w{background:#FFFCF2}
+table.tj td input:focus{outline:2px solid #B8922A;outline-offset:-2px;
+  background:#FFFDF6;position:relative;z-index:3}
+.delr{position:absolute;top:0;right:0;border:none;background:none;
+  color:#D8D0BE;font-size:10px;cursor:pointer;padding:1px 3px;display:none;line-height:1}
+table.tj tr:hover .delr,.gcli:hover .delr{display:block}
+.delr:hover{color:#A8321F}
+.plusg{border:none;background:none;color:#A89F8F;font-size:8.5px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;cursor:pointer;padding:3px;
+  border-bottom:1px dashed #E2DACA}
+.plusg:hover{color:#B8922A;background:#FBF8F2}
+
+/* pauses boissons */
+.lbb{font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:#7A7266;
+  font-weight:700;padding:3px 8px 1px;background:#F5F1E8;
+  border-bottom:1px solid #E2DACA}
+.bo{width:100%;font-family:'Gelasio',Georgia,serif;font-size:9.5px;border:none;
+  background:none;padding:3px 8px;resize:none;overflow:hidden;min-height:20px;
+  line-height:1.4;color:#7A7266;border-bottom:1px solid #E2DACA}
+.bo:focus{outline:2px solid #B8922A;outline-offset:-2px;background:#FFFDF6}
+
+/* groupes de service */
+.gsvc{border-bottom:1px solid #E2DACA;padding:4px 7px 5px;position:relative}
+.gcli{position:relative}
+.gcli input{width:100%;font:inherit;font-size:10px;font-weight:700;border:none;
+  background:none;padding:2px 1px;letter-spacing:.02em;text-transform:uppercase}
+.gnh{display:flex;align-items:center;gap:3px;margin-top:1px}
+.gnh label{font-size:7px;letter-spacing:.05em;text-transform:uppercase;
+  color:#A89F8F;font-weight:700}
+.gnh input{font:inherit;border:none;background:none;padding:1px 2px;min-width:0}
+.gnh .nb{width:30px;font-size:11px;font-weight:700;color:#A8321F;text-align:center}
+.gnh .hr{width:44px;font-size:9.5px;font-weight:600;color:#7A7266}
+.gnh .vn{margin-left:auto;border:1px solid #E2DACA;background:none;border-radius:4px;
+  font-size:7.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:#C9C0AE;cursor:pointer;padding:2px 6px}
+.gnh .vn.on{background:#8B2A3F;border-color:#8B2A3F;color:#fff}
+.gmenu{width:100%;font-family:'Gelasio',Georgia,serif;font-size:9.5px;border:none;
+  background:none;padding:2px 1px;resize:none;overflow:hidden;line-height:1.4;
+  color:#1F1B16;min-height:18px}
+.gmenu:focus{outline:2px solid #B8922A;outline-offset:-2px;background:#FFFDF6}
+.gsvc input:focus{outline:2px solid #B8922A;outline-offset:-2px;background:#FFFDF6}
+
+/* anciens styles de services (conserves pour le bloc menus) */
 /* services */
 td.svc{padding:0}
 .gp{border-bottom:1px solid #F0EBE0;padding:3px 4px;position:relative}
@@ -95,6 +153,9 @@ td.svc{padding:0}
 .plus{width:100%;border:none;background:none;color:#BCB3A0;font-size:14px;
   cursor:pointer;padding:2px;line-height:1}
 .plus:hover{background:#FBF8F2;color:#B8922A}
+.plus.svc{font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:4px 2px;border-top:1px dashed #E2DACA;color:#A89F8F}
+.plus.svc:hover{background:#FBF8F2;color:#B8922A;border-color:#B8922A}
 
 /* boissons */
 tr.lbois td{background:#fff}
@@ -182,12 +243,12 @@ const ECRITURE={admin:1};
 const LECTURE ={admin:1,maitre_hotel:1,commercial:1,revenus:1};
 const JOURS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const PAUSES=[
-  {k:'ca',  lib:"Café d'accueil",  w:0},
-  {k:'caw', lib:"Café d'accueil",  w:1},
-  {k:'pam', lib:'Pause matin',     w:0},
-  {k:'pamw',lib:'Pause matin',     w:1},
-  {k:'ppm', lib:'Pause après-midi',w:0},
-  {k:'ppmw',lib:'Pause après-midi',w:1},
+  {k:'ca',  lib:"Café d'accueil",  ab:'CA',  w:0},
+  {k:'caw', lib:"Café d'accueil",  ab:'CA',  w:1},
+  {k:'pam', lib:'Pause matin',     ab:'PM',  w:0},
+  {k:'pamw',lib:'Pause matin',     ab:'PM',  w:1},
+  {k:'ppm', lib:'Pause après-midi',ab:'PA',  w:0},
+  {k:'ppmw',lib:'Pause après-midi',ab:'PA',  w:1},
 ];
 const TYPES=['Finger','Buffet','Cocktail','Menu assis','Pause','Autre'];
 
@@ -309,93 +370,102 @@ function ligneJours(tr){
   });
 }
 
-function blocPauses(){
-  const box=document.createElement('div');
-  const h=document.createElement('div'); h.className='zt pause';
-  h.innerHTML='Pauses<span class="sp"></span><span class="lg">'+
-    '<i style="background:#F0EBE1"></i>Hôtel<i style="background:#FFF8E6"></i>WTC</span>';
-  box.appendChild(h);
-  const t=document.createElement('table');
+function colJour(j, d){
+  const x=jr(j);
+  if(!x.grpPauses) x.grpPauses=[];
+  const col=document.createElement('div'); col.className='cj';
+
+  // --- en-tête du jour ---
+  const hj=document.createElement('div'); hj.className='hj';
+  hj.innerHTML='<span class="jn">'+JOURS[j]+'</span><span class="jd">'+
+    d.getDate()+'/'+String(d.getMonth()+1).padStart(2,'0')+'</span>';
+  col.appendChild(hj);
+
+  // --- PAUSES ---
+  const zp=document.createElement('div'); zp.className='zsec pause';
+  zp.textContent='Pauses'; col.appendChild(zp);
+  const t=document.createElement('table'); t.className='tj';
   const th=document.createElement('thead'); const tr=document.createElement('tr');
-  const c0=document.createElement('th'); c0.className='cl'; tr.appendChild(c0);
-  ligneJours(tr); th.appendChild(tr); t.appendChild(th);
+  const e=['Noms','CA','CA<br><i>WTC</i>','AM','AM<br><i>WTC</i>','PM','PM<br><i>WTC</i>'];
+  e.forEach((lib,k)=>{
+    const c=document.createElement('th');
+    c.className = k===0?'n':(k%2===0?'w':'h');
+    c.innerHTML=lib; tr.appendChild(c);
+  });
+  th.appendChild(tr); t.appendChild(th);
   const tb=document.createElement('tbody');
-  PAUSES.forEach(p=>{
+  x.grpPauses.forEach((g,i)=>{
     const l=document.createElement('tr');
-    const td0=document.createElement('td'); td0.className='lib'+(p.w?' w':'');
-    td0.innerHTML=p.lib+(p.w?'<small>WTC</small>':'<small>Hôtel</small>');
-    l.appendChild(td0);
-    for(let j=0;j<7;j++){
-      const c=pz(j,p.k);
-      const td=document.createElement('td'); if(p.w) td.className='wtc';
-      const d=document.createElement('div'); d.className='pz';
-      const li=document.createElement('div'); li.className='l';
-      li.appendChild(inp(c.n,'nm','',v=>c.n=v));
-      li.appendChild(inp(c.p,'nb','',v=>c.p=v));
-      d.appendChild(li); td.appendChild(d); l.appendChild(td);
-    }
+    const tn=document.createElement('td'); tn.className='n';
+    tn.appendChild(inp(g.nom,'','',v=>g.nom=v));
+    l.appendChild(tn);
+    ['ca','caw','pam','pamw','ppm','ppmw'].forEach((k,ki)=>{
+      const td=document.createElement('td');
+      td.className = ki%2===1?'w':'h';
+      td.appendChild(inp(g[k],'','',v=>g[k]=v));
+      l.appendChild(td);
+    });
+    const del=document.createElement('button'); del.className='delr'; del.textContent='\u00D7';
+    del.onclick=()=>{ x.grpPauses.splice(i,1); render(); tfSauverPlusTard(); };
+    l.lastChild.style.position='relative';
+    l.lastChild.appendChild(del);
     tb.appendChild(l);
   });
-  // pauses boissons
-  const lb=document.createElement('tr'); lb.className='lbois';
-  const b0=document.createElement('td'); b0.className='lib';
-  b0.innerHTML='Pauses boissons'; lb.appendChild(b0);
-  for(let j=0;j<7;j++){
-    const x=jr(j);
-    const td=document.createElement('td'); td.className='bois';
-    td.appendChild(zone(x.boissons,'',v=>x.boissons=v));
-    lb.appendChild(td);
-  }
-  tb.appendChild(lb);
-  t.appendChild(tb); box.appendChild(t);
-  return box;
+  t.appendChild(tb); col.appendChild(t);
+  const pl=document.createElement('button'); pl.className='plusg'; pl.textContent='+ groupe';
+  pl.onclick=()=>{ x.grpPauses.push({nom:''}); render(); tfSauverPlusTard(); };
+  col.appendChild(pl);
+
+  // --- Pauses boissons ---
+  const lb=document.createElement('div'); lb.className='lbb';
+  lb.innerHTML='<span>Pauses boissons</span>';
+  col.appendChild(lb);
+  const bo=zone(x.boissons,'',v=>x.boissons=v); bo.className='bo';
+  col.appendChild(bo);
+
+  // --- ACTIVITE MIDI ---
+  col.appendChild(secService(x,'midi','Activité midi','midi'));
+  // --- ACTIVITE SOIR ---
+  col.appendChild(secService(x,'soir','Activité soir',''));
+  return col;
 }
 
-function blocService(cle,titre,classe){
-  const box=document.createElement('div');
-  const h=document.createElement('div'); h.className='zt'+(classe?' '+classe:'');
-  h.textContent=titre; box.appendChild(h);
-  const t=document.createElement('table');
-  const th=document.createElement('thead'); const tr=document.createElement('tr');
-  const c0=document.createElement('th'); c0.className='cl'; tr.appendChild(c0);
-  ligneJours(tr); th.appendChild(tr); t.appendChild(th);
-
-  const tb=document.createElement('tbody');
-  const l=document.createElement('tr');
-  const td0=document.createElement('td'); td0.className='lib';
-  td0.innerHTML=(cle==='midi'?'Midi':'Soir')+'<small>Groupe · nb · h · vin</small>';
-  l.appendChild(td0);
-  for(let j=0;j<7;j++){
-    const x=jr(j);
-    const td=document.createElement('td'); td.className='svc';
-    x[cle].forEach((g,i)=>{
-      const gp=document.createElement('div'); gp.className='gp';
-      const l1=document.createElement('div'); l1.className='l1';
-      l1.appendChild(inp(g.client,'cli','',v=>g.client=v));
-      l1.appendChild(inp(g.nb,'nb','',v=>g.nb=v));
-      l1.appendChild(inp(g.heure,'hr','',v=>g.heure=v));
-      const vn=document.createElement('button');
-      vn.className='vn'+(g.vin?' on':''); vn.textContent='\u25C6';
-      vn.title='Vin'; vn.onclick=()=>{ g.vin=!g.vin;
-        vn.className='vn'+(g.vin?' on':''); tfSauverPlusTard(); };
-      l1.appendChild(vn);
-      gp.appendChild(l1);
-      gp.appendChild(zone(g.menu,'menu…',v=>g.menu=v));
-      const del=document.createElement('button'); del.className='del'; del.textContent='\u00D7';
-      del.onclick=()=>{ x[cle].splice(i,1); render(); tfSauverPlusTard(); };
-      gp.appendChild(del);
-      td.appendChild(gp);
-    });
-    const plus=document.createElement('button'); plus.className='plus'; plus.textContent='+';
-    plus.title='Ajouter un groupe';
-    plus.onclick=()=>{ x[cle].push({client:'',nb:'',heure:'',vin:false,menu:''});
-      render(); tfSauverPlusTard(); };
-    td.appendChild(plus);
-    l.appendChild(td);
-  }
-  tb.appendChild(l);
-  t.appendChild(tb); box.appendChild(t);
-  return box;
+function secService(x, cle, titre, classe){
+  const w=document.createElement('div');
+  const z=document.createElement('div'); z.className='zsec '+classe;
+  z.textContent=titre; w.appendChild(z);
+  x[cle].forEach((g,i)=>{
+    const b=document.createElement('div'); b.className='gsvc';
+    const l0=document.createElement('div'); l0.className='gcli';
+    l0.appendChild(inp(g.client,'','NOM DU GROUPE',v=>g.client=v));
+    const del=document.createElement('button'); del.className='delr'; del.textContent='\u00D7';
+    del.onclick=()=>{ if(confirm('Supprimer ce groupe ?')){
+      x[cle].splice(i,1); render(); tfSauverPlusTard(); } };
+    l0.appendChild(del);
+    b.appendChild(l0);
+    const l1=document.createElement('div'); l1.className='gnh';
+    const ln=document.createElement('label'); ln.textContent='Nbre';
+    l1.appendChild(ln);
+    l1.appendChild(inp(g.nb,'nb','',v=>g.nb=v));
+    const lh=document.createElement('label'); lh.textContent='Heure';
+    l1.appendChild(lh);
+    l1.appendChild(inp(g.heure,'hr','',v=>g.heure=v));
+    const vn=document.createElement('button');
+    vn.className='vn'+(g.vin?' on':''); vn.textContent='Vin';
+    vn.onclick=()=>{ g.vin=!g.vin; vn.className='vn'+(g.vin?' on':'');
+      tfSauverPlusTard(); };
+    l1.appendChild(vn);
+    b.appendChild(l1);
+    const men=zone(g.menu,'Type de menu et composition…',v=>g.menu=v);
+    men.className='gmenu';
+    b.appendChild(men);
+    w.appendChild(b);
+  });
+  const pl=document.createElement('button'); pl.className='plusg'; pl.textContent='+ groupe';
+  pl.onclick=()=>{ x[cle].push({client:'',nb:'',heure:'',vin:false,menu:''});
+    render(); tfSauverPlusTard(); };
+  w.appendChild(pl);
+  return w;
 }
 
 function blocRef(){
@@ -431,9 +501,9 @@ function render(){
   document.getElementById('sem').innerHTML=libSem(semaineISO)+
     '<small>Semaine '+numSem(new Date(semaineISO+'T12:00:00'))+'</small>';
   const m=document.getElementById('feuille'); m.innerHTML='';
-  m.appendChild(blocPauses());
-  m.appendChild(blocService('midi','Activité midi','midi'));
-  m.appendChild(blocService('soir','Activité soir'));
+  const g=document.createElement('div'); g.className='grille7';
+  joursSem(semaineISO).forEach((d,j)=>g.appendChild(colJour(j,d)));
+  m.appendChild(g);
   m.appendChild(blocRef());
 }
 function allerA(n){ const d=new Date(semaineISO+'T12:00:00');
