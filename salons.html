@@ -56,7 +56,9 @@ thead th.suiv .jn{color:#7A7266}
 th.cs{width:118px;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
   color:#7A7266;font-weight:700}
 td.sal{background:#F5F1E8;font-weight:700;font-size:11px;padding:5px 8px;
-  letter-spacing:.02em;line-height:1.25}
+  letter-spacing:.02em;line-height:1.25;position:relative}
+.fusable{display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:#1E5878;opacity:.55;margin-left:6px;vertical-align:1px}
 td.jour{position:relative;min-height:38px;height:auto}
 tr.wtc td{position:relative}
 td.jour.rempli{background:#FEFCF7}
@@ -119,11 +121,13 @@ body.tf-lecture .fus-btn{display:none!important}
 </style><style>
 @media print{
  @page{size:A3 landscape;margin:7mm}
- #tfbar,#tfband,.nav,.act,#etat,.aide,#mf,.fus-btn{display:none!important}
+ #tfbar,#tfband,.act,#etat,.aide,#mf,.fus-btn,.nav button{display:none!important}
+ .nav{display:inline-block}
  header{border:none;padding:0 0 3mm;display:block}
  header h1{font-size:15pt;letter-spacing:.14em;display:inline-block}
- header .sem{display:inline-block;font-size:12pt;margin-left:14mm;min-width:auto}
- header .sem small{display:inline;margin-left:6mm;font-size:8pt}
+ header .sem{display:inline-block;font-size:12pt;margin-left:14mm;min-width:auto;
+   font-weight:700}
+ header .sem small{display:inline;margin-left:6mm;font-size:8pt;color:#B8922A}
  body{background:#fff;font-size:8.5pt}
  main{padding:0}
  .feuille{border:1px solid #999;box-shadow:none;border-radius:0}
@@ -137,7 +141,7 @@ body.tf-lecture .fus-btn{display:none!important}
  td.jour{min-height:9mm;height:auto;
    -webkit-print-color-adjust:exact;print-color-adjust:exact}
  tr.wtc td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
- .col-btn,.pal{display:none!important}
+ .col-btn,.pal,.fusable{display:none!important}
  .k textarea{color:#1F1B16!important}
  .k .hor{background:#EAF2F7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
  td.jour.fus{background:#EAF2F7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -283,7 +287,9 @@ function libSem(iso){ const j=joursSem(iso);
   return f(j[0])+' — '+f(j[7])+' '+j[7].getFullYear(); }
 
 function sem(){ if(!D.semaines[semaineISO]) D.semaines[semaineISO]={matin:{},soir:{}};
-  return D.semaines[semaineISO]; }
+  const s=D.semaines[semaineISO];
+  if(!s.matin) s.matin={}; if(!s.soir) s.soir={};
+  return s; }
 function cel(z,sal,j){
   const s=sem();
   if(!s[z][sal]) s[z][sal]={};
@@ -355,7 +361,13 @@ function tableau(z,liste,titre,classe){
   const tb=document.createElement('tbody');
   liste.forEach((sal,idx)=>{
     const l=document.createElement('tr');
-    const td0=document.createElement('td'); td0.className='sal'; td0.textContent=sal;
+    const td0=document.createElement('td'); td0.className='sal';
+    td0.textContent=sal;
+    if(FUSIONNABLES[sal]){
+      const pt=document.createElement('span'); pt.className='fusable';
+      pt.title='Ce salon peut être réuni avec le suivant — survolez une case et cliquez la flèche';
+      td0.appendChild(pt);
+    }
     l.appendChild(td0);
     jours.forEach((d,j)=>{
       if(estMasque(z,liste,idx,j)) return;
@@ -481,13 +493,13 @@ async function tfInit(){
   if(doc.maj_par_nom) tfEtat('Dernière modification : '+doc.maj_par_nom+' le '+
     new Date(doc.maj_le).toLocaleString('fr-FR'));
   semaineISO=isoSem(new Date());
-  render();
   document.getElementById('prec').onclick=()=>allerA(-1);
   document.getElementById('suiv').onclick=()=>allerA(1);
   document.getElementById('auj').onclick=()=>{ semaineISO=isoSem(new Date()); render(); };
   document.getElementById('imp').onclick=()=>window.print();
   document.getElementById('mfan').onclick=fermerFusion;
   document.getElementById('mfok').onclick=validerFusion;
+  render();
 }
 window.addEventListener('DOMContentLoaded',tfInit);
 </script>

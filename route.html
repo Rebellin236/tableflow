@@ -112,17 +112,41 @@ tr.wsep td{background:#FFF8E6;font-size:8.5px;letter-spacing:.12em;text-transfor
 .cons input:focus,.cons textarea:focus{outline:none;background:#FFFDF6;border-color:#B8922A}
 .cons .nb{font-weight:700;color:#A8321F;text-align:center;font-size:13px}
 
+#pr{display:none;position:fixed;inset:0;background:rgba(31,27,22,.45);z-index:120;
+  align-items:center;justify-content:center;padding:24px}
+#pr.on{display:flex}
+.prc{background:#fff;border-radius:12px;padding:24px 26px;width:100%;max-width:560px;
+  max-height:82vh;display:flex;flex-direction:column}
+.prc h3{font-family:'Cinzel',serif;font-size:13px;letter-spacing:.12em;
+  text-transform:uppercase;font-weight:600;margin-bottom:8px}
+.prc .pi{font-size:11.5px;color:#7A7266;line-height:1.55;margin-bottom:14px}
+#prListe{overflow-y:auto;flex:1}
+#prListe h4{font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:#B8922A;font-weight:700;margin:10px 0 4px}
+#prListe .pl{font-size:12px;padding:4px 2px;border-bottom:1px solid #F0EBE0;
+  display:flex;gap:8px;align-items:baseline}
+#prListe .pl b{min-width:130px}
+#prListe .pl span{color:#7A7266;font-size:11px}
+#prListe .vide{font-size:11.5px;color:#7A7266;font-style:italic;padding:6px 2px}
+.prr{display:flex;gap:8px;margin-top:16px}
+.prr button{flex:1;padding:10px;border-radius:7px;font:inherit;font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;font-weight:700;cursor:pointer}
+.prr .an{background:none;border:1px solid #E2DACA;color:#7A7266}
+.prr .ok{background:#1F1B16;border:1px solid #1F1B16;color:#fff}
+.prr .ok:hover{background:#B8922A;border-color:#B8922A}
 body.tf-lecture input,body.tf-lecture textarea{pointer-events:none}
 body.tf-lecture .plusg,body.tf-lecture .delr{display:none!important}
 @media(max-width:1100px){.deux{grid-template-columns:1fr}.grille3{grid-template-columns:1fr}}
 </style><style>
 @media print{
  @page{size:A4 portrait;margin:6mm}
- #tfbar,#tfband,.nav,.act,#etat,.plusg,.delr,td.sup{display:none!important}
+ #tfbar,#tfband,.act,#etat,.plusg,.delr,td.sup,.nav button,#pr{display:none!important}
+ .nav{display:inline-block}
  header{border:none;padding:0 0 1mm;display:block}
  header h1{font-size:10.5pt;letter-spacing:.13em;display:inline-block}
- header .jr{display:inline-block;font-size:9.5pt;margin-left:6mm;min-width:auto}
- header .jr small{display:inline;margin-left:3mm;font-size:6.5pt}
+ header .jr{display:inline-block;font-size:10.5pt;margin-left:6mm;min-width:auto;
+   font-weight:700}
+ header .jr small{display:inline;margin-left:3mm;font-size:6.5pt;color:#B8922A}
  body{background:#fff;font-size:6.8pt}
  main{padding:0;max-width:none}
  .proverbe{border-color:#aaa;border-radius:0;padding:1mm 2.5mm;margin-bottom:1.6mm}
@@ -181,9 +205,24 @@ body.tf-lecture .plusg,body.tf-lecture .delr{display:none!important}
   </div>
   <span class="sp"></span>
   <span id="etat" style="font-size:10.5px;color:#7A7266"></span>
+  <button class="act" id="pre" style="display:none">Pré-remplir</button>
   <button class="act p" id="imp">Imprimer</button>
 </header>
 <main><div id="feuille"></div></main>
+
+<div id="pr">
+  <div class="prc">
+    <h3>Pré-remplissage — à relire avant d'importer</h3>
+    <p class="pi">Proposition construite depuis l'<b>Activité restauration</b> et le
+      <b>Planning salons</b> pour ce jour. Les lignes déjà présentes sont conservées ;
+      rien n'est écrasé. Relisez, puis validez.</p>
+    <div id="prListe"></div>
+    <div class="prr">
+      <button class="an" id="prAn">Annuler</button>
+      <button class="ok" id="prOk">Importer</button>
+    </div>
+  </div>
+</div>
 <script>
 const SUPABASE_URL = "https://auxnjixcppmsqmqkmjsj.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1eG5qaXhjcHBtc3FtcWttanNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NDkzNDIsImV4cCI6MjEwMDEyNTM0Mn0.sHT_4cpxIBaqaGTnLDevCjWcnLe8gn0dG1sTo6dbjXE";
@@ -463,6 +502,129 @@ function render(){
 }
 function allerA(n){ const d=new Date(jourISO+'T12:00:00');
   d.setDate(d.getDate()+n); jourISO=iso(d); render(); }
+
+// ---------- PRÉ-REMPLISSAGE CROISÉ ----------
+const CORRESP_SALONS = {'PLANIER':'PLANIER','RIOU':'RIOU','FRIOUL':'FRIOUL',
+  'RAIMU':'RAIMU','PAGNOL':'PAGNOL','SAINT-VICTOR':'ST-VICTOR',
+  'LA MAJOR':'LA MAJOR','BANDOL':'BANDOL','CASSIS':'CASSIS'};
+let prProposition=null;
+
+function normNom(n){ return (n||'').trim().toUpperCase(); }
+function dejaPresent(liste, nom){
+  return liste.some(l=>normNom(l.groupe)===normNom(nom)); }
+
+async function preparerPreRemplissage(){
+  const d=new Date(jourISO+'T12:00:00');
+  const lundi=new Date(d); lundi.setDate(d.getDate()-((d.getDay()+6)%7));
+  const sIso=iso(lundi), idx=(d.getDay()+6)%7;
+
+  const {data,error}=await sb.from('documents').select('id,contenu')
+    .in('id',['activite_resto','planning_salons']);
+  if(error||!data){ alert('Lecture des plannings impossible.'); return; }
+  const docs={}; data.forEach(x=>docs[x.id]=x.contenu||{});
+
+  const x=jr();
+  const prop={cafe:[],pausesM:[],pausesA:[],dej:[],diner:[],salles:[]};
+
+  // --- depuis l'activité ---
+  const ac=(docs.activite_resto&&docs.activite_resto.semaines)?
+    docs.activite_resto.semaines[sIso]:null;
+  const aj=(ac&&ac.jours)?ac.jours[idx]:null;
+  if(aj){
+    (aj.grpPauses||[]).forEach(g=>{
+      [['ca','cafe',''],['caw','cafe','WTC'],
+       ['pam','pausesM',''],['pamw','pausesM','WTC'],
+       ['ppm','pausesA',''],['ppmw','pausesA','WTC']].forEach(([k,svc,inf])=>{
+        if(g[k] && !dejaPresent(x[svc], g.nom) &&
+           !prop[svc].some(p=>normNom(p.groupe)===normNom(g.nom)))
+          prop[svc].push({heure:'',groupe:g.nom||'',salon:'',pax:g[k],infos:inf});
+      });
+    });
+    (aj.midi||[]).forEach(g=>{
+      if(g.client && !dejaPresent(x.dej, g.client))
+        prop.dej.push({heure:g.heure||'',groupe:g.client,salon:'',
+          pax:g.nb||'',infos:''});
+    });
+    (aj.soir||[]).forEach(g=>{
+      if(g.client && !dejaPresent(x.diner, g.client))
+        prop.diner.push({heure:g.heure||'',groupe:g.client,salon:'',
+          pax:g.nb||'',infos:''});
+    });
+  }
+
+  // --- depuis le planning salons ---
+  const sa=(docs.planning_salons&&docs.planning_salons.semaines)?
+    docs.planning_salons.semaines[sIso]:null;
+  if(sa){
+    Object.keys(CORRESP_SALONS).forEach(salPl=>{
+      const cible=CORRESP_SALONS[salPl];
+      let src=null;
+      ['matin','soir'].forEach(zn=>{
+        const c=sa[zn]&&sa[zn][salPl]&&sa[zn][salPl][idx];
+        if(c&&c.n&&!src) src=c;
+      });
+      if(src){
+        const actuel=ck('ck',cible);
+        if(!actuel.g && !actuel.c)
+          prop.salles.push({salle:cible, g:src.n, c:src.h||''});
+      }
+    });
+  }
+  return prop;
+}
+
+function ouvrirPreRemplissage(prop){
+  prProposition=prop;
+  const z=document.getElementById('prListe'); z.innerHTML='';
+  const secs=[['cafe',"Café d'accueil"],['pausesM','Pauses matin'],
+    ['dej','Déjeuner'],['pausesA','Pauses après-midi'],['diner','Dîner / Cocktail']];
+  let total=0;
+  secs.forEach(([k,lib])=>{
+    if(!prop[k].length) return;
+    total+=prop[k].length;
+    const h=document.createElement('h4'); h.textContent=lib; z.appendChild(h);
+    prop[k].forEach(l=>{
+      const d=document.createElement('div'); d.className='pl';
+      d.innerHTML='<b>'+l.groupe+'</b><span>'+(l.pax?l.pax+' pers.':'')+
+        (l.heure?' · '+l.heure:'')+(l.infos?' · '+l.infos.slice(0,60):'')+'</span>';
+      z.appendChild(d);
+    });
+  });
+  if(prop.salles.length){
+    total+=prop.salles.length;
+    const h=document.createElement('h4'); h.textContent='Salles — mise en place';
+    z.appendChild(h);
+    prop.salles.forEach(l=>{
+      const d=document.createElement('div'); d.className='pl';
+      d.innerHTML='<b>'+l.salle+'</b><span>'+l.g+(l.c?' · '+l.c:'')+'</span>';
+      z.appendChild(d);
+    });
+  }
+  if(!total){
+    z.innerHTML='<div class="vide">Rien à importer : soit les plannings sont vides '+
+      'pour ce jour, soit la feuille de route contient déjà ces groupes.</div>';
+    document.getElementById('prOk').style.display='none';
+  } else {
+    document.getElementById('prOk').style.display='';
+  }
+  document.getElementById('pr').classList.add('on');
+}
+function fermerPreRemplissage(){
+  document.getElementById('pr').classList.remove('on'); prProposition=null; }
+function appliquerPreRemplissage(){
+  if(!prProposition) return;
+  const x=jr();
+  ['cafe','pausesM','dej','pausesA','diner'].forEach(k=>{
+    prProposition[k].forEach(l=>x[k].push(l)); });
+  prProposition.salles.forEach(l=>{
+    const c=ck('ck',l.salle);
+    if(!c.g) c.g=l.g;
+    if(!c.c) c.c=l.c;
+  });
+  fermerPreRemplissage();
+  render(); tfSauverPlusTard();
+  tfEtat('Pré-remplissage importé — relisez et complétez.');
+}
 
 async function tfInit(){
   if(!await tfDemarrer()) return;

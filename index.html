@@ -94,6 +94,17 @@ footer{text-align:center;font-size:9.5px;letter-spacing:.1em;text-transform:uppe
 .mrow .an{background:none;border:1px solid #E8DFC9;color:#7A7266}
 .mrow .ok{background:#1F1B16;color:#fff}
 .mrow .ok:hover{background:#B8922A}
+#jour{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 22px;
+  background:#fff;border:1px solid #E8DFC9;border-radius:12px;padding:14px 20px}
+#jour .jt{font-family:'Gelasio',serif;font-size:15px;font-weight:700;
+  text-transform:capitalize;margin-right:6px}
+#jour .jv{font-size:12px;color:#7A7266}
+#jour .chip{display:flex;flex-direction:column;gap:1px;padding:7px 14px;
+  background:#FCF8F1;border:1px solid #EFE8D8;border-radius:9px}
+#jour .chip b{font-size:13.5px;color:#1F1B16}
+#jour .chip span{font-size:9px;letter-spacing:.09em;text-transform:uppercase;
+  color:#B8922A;font-weight:700}
+.mod .ic svg{width:26px;height:26px;display:block}
 #outils{display:none;align-items:center;gap:14px;margin:26px 0 0;padding:14px 18px;
   background:#fff;border:1px solid #E8DFC9;border-radius:10px}
 #outils button{font:inherit;font-size:11.5px;font-weight:700;letter-spacing:.06em;
@@ -169,6 +180,7 @@ footer{text-align:center;font-size:9.5px;letter-spacing:.1em;text-transform:uppe
   <main>
     <div class="bienv">Bonjour <b id="bienvNom"></b></div>
     <div class="intro">Vos modules F&amp;B. Les accès dépendent de votre fonction.</div>
+    <div id="jour"></div>
     <div class="grille" id="grille"></div>
     <div id="outils" style="display:none">
       <button id="btSauve" onclick="sauvegarderTout()">Télécharger une sauvegarde</button>
@@ -213,22 +225,34 @@ const DOMAINE = "tableflow.local";   // domaine interne des identifiants
 let sb = null, moi = null, profil = null;
 
 // ---------- DÉFINITION DES MODULES ----------
+
+const ICONES = {
+ menu_bar:'<svg viewBox="0 0 24 24" fill="none" stroke="#B8922A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14l-7 9v6"/><path d="M8.5 21h7"/><path d="M7.5 6.5h9"/></svg>',
+ assis:'<svg viewBox="0 0 24 24" fill="none" stroke="#B8922A" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/></svg>',
+ buffet:'<svg viewBox="0 0 24 24" fill="none" stroke="#B8922A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3c-1.5 2.4-1.5 4.6 0 7 1.5 2.4 1.5 4.6 0 7"/><path d="M12.5 3c-1.5 2.4-1.5 4.6 0 7 1.5 2.4 1.5 4.6 0 7"/><path d="M4 21h16"/></svg>',
+ room:'<svg viewBox="0 0 24 24" fill="none" stroke="#B8922A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-7h18v7"/><path d="M3 11V6"/><path d="M6.5 11V9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 18h18"/></svg>',
+ staff:'<svg viewBox="0 0 24 24" fill="none" stroke="#B8922A" stroke-width="1.4" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c.6-3.4 2.8-5.2 5.5-5.2s4.9 1.8 5.5 5.2"/><circle cx="17" cy="9" r="2.4"/><path d="M15.6 14.6c2.6.2 4.3 1.8 4.9 4.6"/></svg>',
+ activite:'<svg viewBox="0 0 24 24" fill="none" stroke="#B8922A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4M16 3v4"/><path d="M7.5 14h3M13.5 14h3M7.5 17h3"/></svg>',
+ salons:'<svg viewBox="0 0 24 24" fill="none" stroke="#B8922A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V10M9.3 21V10M14.6 21V10M20 21V10"/><path d="M2.8 10L12 3.8 21.2 10"/><path d="M2.8 21h18.4"/></svg>',
+ route:'<svg viewBox="0 0 24 24" fill="none" stroke="#B8922A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M9 3.5h6v3H9z"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"/></svg>'
+};
+
 const MODULES = [
-  {id:'menu_bar',     ic:'🍸', t:'Carte du Bar',        d:'Cartes du Bar 1.13 — français et anglais',
+  {id:'menu_bar',     ico:'menu_bar', t:'Carte du Bar',        d:'Cartes du Bar 1.13 — français et anglais',
    url:'menu-bar.html'},
-  {id:'menu_banquet', ic:'🍽️', t:'Menus Assis',         d:'Menus servis à table — banquet',
+  {id:'menu_banquet', ico:'assis', t:'Menus Assis',         d:'Menus servis à table — banquet',
    url:'menu-assis.html'},
-  {id:'menu_banquet', ic:'🥂', t:'Buffets & Cocktails', d:'Buffets, cocktails dînatoires, fingers',
+  {id:'menu_banquet', ico:'buffet', t:'Buffets & Cocktails', d:'Buffets, cocktails dînatoires, fingers',
    url:'menu-buffet.html'},
-  {id:'room',         ic:'🛏️', t:'Room Directory',      d:'Cartes en chambre — TastyCloud',
+  {id:'room',         ico:'room', t:'Room Directory',      d:'Cartes en chambre — TastyCloud',
    url:'room.html'},
-  {id:'staff',        ic:'📋', t:'Planning Personnel',  d:'Planning des équipes et codes horaires',
+  {id:'staff',        ico:'route', t:'Planning Personnel',  d:'Planning des équipes et codes horaires',
    url:'planning.html'},
-  {id:'activite',     ic:'📅', t:'Activité Restauration', d:'Événements et couverts de la semaine',
+  {id:'activite',     ico:'activite', t:'Activité Restauration', d:'Événements et couverts de la semaine',
    url:'activite.html'},
-  {id:'salons',       ic:'🏛️', t:'Planning Salons',     d:'Occupation des salons et séminaires',
+  {id:'salons',       ico:'salons', t:'Planning Salons',     d:'Occupation des salons et séminaires',
    url:'salons.html'},
-  {id:'route',        ic:'📋', t:'Feuille de Route',    d:'Organisation du jour — services et salles',
+  {id:'route',        ico:'route', t:'Feuille de Route',    d:'Organisation du jour — services et salles',
    url:'route.html'},
 ];
 
@@ -320,7 +344,7 @@ function afficherApp(){
         '<div class="t">'+m.t+'</div><div class="d">'+m.d+'</div>';
     } else {
       a.className='mod'; a.href=m.url;
-      a.innerHTML = badge + '<span class="ic">'+m.ic+'</span>'+
+      a.innerHTML = badge + '<span class="ic">'+(ICONES[m.ico]||'')+'</span>'+
         '<div class="t">'+m.t+'</div><div class="d">'+m.d+'</div>';
     }
     g.appendChild(a);
@@ -328,7 +352,66 @@ function afficherApp(){
   if(!n) g.innerHTML='<div class="vide">Aucun module ne vous est attribué.<br>'+
     "Contactez Antoine Forster pour l'ouverture de vos accès.</div>";
   chargerModifs();
+  chargerJour();
   $('outils').style.display = profil.role==='admin' ? 'flex' : 'none';
+}
+
+// ---------- TABLEAU DE BORD DU JOUR ----------
+function isoJ(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+
+  String(d.getDate()).padStart(2,'0'); }
+function lundiIso(d){ const x=new Date(d); x.setDate(x.getDate()-((x.getDay()+6)%7));
+  return isoJ(x); }
+function somme(vals){ return vals.reduce((a,v)=>{const n=parseInt(v); return a+(isNaN(n)?0:n);},0); }
+
+async function chargerJour(){
+  const z=$('jour'); if(!z) return;
+  const auj=new Date(), jIso=isoJ(auj), sIso=lundiIso(auj), idx=(auj.getDay()+6)%7;
+  const {data} = await sb.from('documents').select('id,contenu')
+    .in('id',['feuille_route','activite_resto','planning_salons']);
+  if(!data||!data.length){ z.style.display='none'; return; }
+  const docs={}; data.forEach(d=>docs[d.id]=d.contenu||{});
+  const chips=[];
+
+  const rt=(docs.feuille_route&&docs.feuille_route.jours)?docs.feuille_route.jours[jIso]:null;
+  if(rt&&rt.pdjTotal) chips.push(['Petit déjeuner', rt.pdjTotal+' couverts']);
+
+  const ac=(docs.activite_resto&&docs.activite_resto.semaines)?docs.activite_resto.semaines[sIso]:null;
+  const aj=(ac&&ac.jours)?ac.jours[idx]:null;
+  if(aj){
+    if(Array.isArray(aj.grpPauses)&&aj.grpPauses.length){
+      const p=somme(aj.grpPauses.flatMap(g=>[g.ca,g.caw,g.pam,g.pamw,g.ppm,g.ppmw]));
+      if(p) chips.push(['Pauses', p+' couverts']);
+    }
+    if(Array.isArray(aj.midi)&&aj.midi.length)
+      chips.push(['Déjeuner', aj.midi.length+' groupe'+(aj.midi.length>1?'s':'')+
+        ' · '+somme(aj.midi.map(g=>g.nb))+' couverts']);
+    if(Array.isArray(aj.soir)&&aj.soir.length)
+      chips.push(['Dîner', aj.soir.length+' groupe'+(aj.soir.length>1?'s':'')+
+        ' · '+somme(aj.soir.map(g=>g.nb))+' couverts']);
+  }
+
+  const sa=(docs.planning_salons&&docs.planning_salons.semaines)?docs.planning_salons.semaines[sIso]:null;
+  if(sa){
+    let occ=0;
+    ['matin','soir'].forEach(zn=>{
+      const zz=sa[zn]||{};
+      Object.keys(zz).forEach(sal=>{
+        const c=zz[sal]&&zz[sal][idx];
+        if(c&&c.n&&sal!=='__WTC__') occ++;
+      });
+    });
+    if(occ) chips.push(['Salons occupés', occ+'']);
+  }
+
+  if(!chips.length){
+    z.innerHTML='<div class="jt">'+auj.toLocaleDateString('fr-FR',
+      {weekday:'long',day:'numeric',month:'long'})+'</div>'+
+      '<div class="jv">Aucune donnée saisie pour aujourd\'hui.</div>';
+    return;
+  }
+  z.innerHTML='<div class="jt">'+auj.toLocaleDateString('fr-FR',
+    {weekday:'long',day:'numeric',month:'long'})+'</div>'+
+    chips.map(c=>'<div class="chip"><b>'+c[1]+'</b><span>'+c[0]+'</span></div>').join('');
 }
 
 // ---------- SUIVI DES MODIFICATIONS ----------

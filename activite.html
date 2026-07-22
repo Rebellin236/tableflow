@@ -63,6 +63,10 @@ td.lib small{display:block;font-size:8px;letter-spacing:.04em;font-weight:600;
   color:#A89F8F;text-transform:none;margin-top:1px}
 
 /* grille : 7 colonnes de jours côte à côte */
+.totj{margin-top:auto;border-top:2px solid #E2DACA;background:#F5F1E8;
+  padding:5px 8px;display:flex;flex-direction:column;gap:2px;font-size:9.5px;color:#7A7266}
+.totj b{font-size:12px;color:#1F1B16}
+.totj i{font-style:normal;font-size:8.5px;color:#A89F8F}
 .grille7{display:grid;grid-template-columns:repeat(7,1fr);gap:0;
   border-top:1px solid #E2DACA}
 .cj{border-right:1px solid #E2DACA;display:flex;flex-direction:column}
@@ -85,9 +89,9 @@ table.tj th i{font-style:normal;font-size:6px;color:#A89F8F;display:block}
 table.tj th.n{width:36%;text-align:left;padding-left:5px}
 table.tj th.w{background:#FFF8E6;color:#8a7320}
 table.tj td input{width:100%;font:inherit;border:none;background:none;
-  padding:3px 2px;text-align:center;font-size:9.5px;font-weight:700}
+  padding:3px 2px;text-align:center;font-size:10.5px;font-weight:700}
 table.tj td.n input{text-align:left;padding-left:5px;font-size:9px}
-table.tj td.n textarea{width:100%;font:inherit;font-size:9px;font-weight:700;border:none;
+table.tj td.n textarea{width:100%;font:inherit;font-size:10.5px;font-weight:700;border:none;
   background:none;padding:3px 14px 3px 5px;resize:none;overflow:hidden;line-height:1.3;display:block}
 table.tj td.n textarea:focus{outline:2px solid #B8922A;outline-offset:-2px;
   background:#FFFDF6;position:relative;z-index:3}
@@ -115,7 +119,7 @@ table.tj tr:hover .delr,.gcli:hover .delr{display:block}
 /* groupes de service */
 .gsvc{border-bottom:1px solid #E2DACA;padding:4px 7px 5px;position:relative}
 .gcli{position:relative}
-.gcli input,.gcli textarea{width:100%;font:inherit;font-size:10px;font-weight:700;border:none;
+.gcli input,.gcli textarea{width:100%;font:inherit;font-size:11.5px;font-weight:700;border:none;
   background:none;padding:2px 16px 2px 1px;letter-spacing:.02em;text-transform:uppercase;
   resize:none;overflow:hidden;line-height:1.35;display:block}
 .gcli textarea:focus{outline:2px solid #B8922A;outline-offset:-2px;background:#FFFDF6}
@@ -133,13 +137,13 @@ body.tf-lecture .col-btn{display:none!important}
 .gnh label{font-size:7px;letter-spacing:.05em;text-transform:uppercase;
   color:#A89F8F;font-weight:700}
 .gnh input{font:inherit;border:none;background:none;padding:1px 2px;min-width:0}
-.gnh .nb{width:30px;font-size:11px;font-weight:700;color:#A8321F;text-align:center}
+.gnh .nb{width:32px;font-size:12px;font-weight:700;color:#A8321F;text-align:center}
 .gnh .hr{width:44px;font-size:9.5px;font-weight:600;color:#7A7266}
 .gnh .vn{margin-left:auto;border:1px solid #E2DACA;background:none;border-radius:4px;
   font-size:7.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
   color:#C9C0AE;cursor:pointer;padding:2px 6px}
 .gnh .vn.on{background:#8B2A3F;border-color:#8B2A3F;color:#fff}
-.gmenu{width:100%;font-family:'Gelasio',Georgia,serif;font-size:9.5px;border:none;
+.gmenu{width:100%;font-family:'Gelasio',Georgia,serif;font-size:10.5px;border:none;
   background:none;padding:2px 1px;resize:none;overflow:hidden;line-height:1.4;
   color:#1F1B16;min-height:18px}
 .gmenu:focus{outline:2px solid #B8922A;outline-offset:-2px;background:#FFFDF6}
@@ -201,11 +205,13 @@ body.tf-lecture .plus,body.tf-lecture .plus2,body.tf-lecture .del{display:none!i
 </style><style>
 @media print{
  @page{size:A3 landscape;margin:6mm}
- #tfbar,#tfband,.nav,.act,#etat,.plus,.plus2,.del{display:none!important}
+ #tfbar,#tfband,.act,#etat,.plus,.plus2,.del,.plusg,.delr,.nav button{display:none!important}
+ .nav{display:inline-block}
  header{border:none;padding:0 0 3mm;display:block}
  header h1{font-size:14pt;letter-spacing:.14em;display:inline-block}
- header .sem{display:inline-block;font-size:11pt;margin-left:12mm;min-width:auto}
- header .sem small{display:inline;margin-left:5mm;font-size:8pt}
+ header .sem{display:inline-block;font-size:11.5pt;margin-left:12mm;min-width:auto;
+   font-weight:700}
+ header .sem small{display:inline;margin-left:5mm;font-size:8pt;color:#B8922A}
  body{background:#fff;font-size:8pt}
  main{padding:0}
  .feuille{border:1px solid #999;box-shadow:none;border-radius:0}
@@ -221,6 +227,7 @@ body.tf-lecture .plus,body.tf-lecture .plus2,body.tf-lecture .del{display:none!i
  tr.lbois td.lib{background:#EFEAE0!important}
  input,textarea,select{color:#1F1B16!important}
  table.tj td,.gsvc{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .totj{background:#EFEAE0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
  .col-btn,.pal{display:none!important}
  .gp .nb{color:#A8321F!important}
  .gp .vn.on{color:#8B2A3F!important}
@@ -350,14 +357,25 @@ function libSem(iso){ const j=joursSem(iso);
 function sem(){
   if(!D.semaines[semaineISO]) D.semaines[semaineISO]={jours:{},ref:[]};
   const s=D.semaines[semaineISO];
-  if(!s.ref) s.ref=[];
+  if(!s.jours) s.jours={};
+  // migration : l'ancien format ref était un objet {finger,buffet,cocktail}
+  if(!Array.isArray(s.ref)){
+    const anc=s.ref||{}; s.ref=[];
+    [['finger','Finger'],['buffet','Buffet'],['cocktail','Cocktail']].forEach(([k,t])=>{
+      if(anc[k]) s.ref.push({groupe:'',type:t,contenu:anc[k]});
+    });
+  }
   return s;
 }
 function jr(j){
   const s=sem();
-  if(!s.jours[j]) s.jours[j]={pauses:{},boissons:'',midi:[],soir:[]};
+  if(!s.jours[j]) s.jours[j]={grpPauses:[],boissons:'',notes:'',midi:[],soir:[]};
   const x=s.jours[j];
-  if(!x.pauses) x.pauses={};
+  if(!Array.isArray(x.grpPauses)) x.grpPauses=[];
+  if(!Array.isArray(x.midi)) x.midi=[];
+  if(!Array.isArray(x.soir)) x.soir=[];
+  if(x.boissons==null) x.boissons='';
+  if(x.notes==null) x.notes='';
   return x;
 }
 function pz(j,k){
@@ -473,11 +491,38 @@ function colJour(j, d){
   const bo=zone(x.boissons,'',v=>x.boissons=v); bo.className='bo';
   col.appendChild(bo);
 
+  // --- Notes libres ---
+  const ln=document.createElement('div'); ln.className='lbb';
+  ln.innerHTML='<span>Notes</span>';
+  col.appendChild(ln);
+  const no=zone(x.notes,'',v=>x.notes=v); no.className='bo';
+  col.appendChild(no);
+
   // --- ACTIVITE MIDI ---
   col.appendChild(secService(x,'midi','Activité midi','midi'));
   // --- ACTIVITE SOIR ---
   col.appendChild(secService(x,'soir','Activité soir',''));
+
+  // --- TOTAUX DU JOUR ---
+  const tt=document.createElement('div'); tt.className='totj';
+  tt.dataset.jour=j;
+  col.appendChild(tt);
   return col;
+}
+
+function sommeInt(vals){ return vals.reduce((a,v)=>{const n=parseInt(v);
+  return a+(isNaN(n)?0:n);},0); }
+function majTotauxJour(){
+  document.querySelectorAll('.totj').forEach(tt=>{
+    const j=parseInt(tt.dataset.jour);
+    const x=jr(j);
+    const p=sommeInt((x.grpPauses||[]).flatMap(g=>[g.ca,g.caw,g.pam,g.pamw,g.ppm,g.ppmw]));
+    const m=sommeInt((x.midi||[]).map(g=>g.nb));
+    const so=sommeInt((x.soir||[]).map(g=>g.nb));
+    tt.innerHTML='<span><b>'+p+'</b> pauses</span>'+
+      '<span><b>'+(m+so)+'</b> restauration'+
+      ((m||so)?' <i>('+m+' midi · '+so+' soir)</i>':'')+'</span>';
+  });
 }
 
 function secService(x, cle, titre, classe){
@@ -561,7 +606,9 @@ function render(){
   joursSem(semaineISO).forEach((d,j)=>g.appendChild(colJour(j,d)));
   m.appendChild(g);
   m.appendChild(blocRef());
+  majTotauxJour();
 }
+document.addEventListener('input', ()=>{ if(typeof majTotauxJour==='function') majTotauxJour(); });
 function allerA(n){ const d=new Date(semaineISO+'T12:00:00');
   d.setDate(d.getDate()+n*7); semaineISO=isoSem(d); render(); }
 
@@ -580,11 +627,11 @@ async function tfInit(){
   if(doc.maj_par_nom) tfEtat('Dernière modification : '+doc.maj_par_nom+' le '+
     new Date(doc.maj_le).toLocaleString('fr-FR'));
   semaineISO=isoSem(new Date());
-  render();
   document.getElementById('prec').onclick=()=>allerA(-1);
   document.getElementById('suiv').onclick=()=>allerA(1);
   document.getElementById('auj').onclick=()=>{ semaineISO=isoSem(new Date()); render(); };
   document.getElementById('imp').onclick=()=>window.print();
+  render();
 }
 window.addEventListener('DOMContentLoaded',tfInit);
 </script>
