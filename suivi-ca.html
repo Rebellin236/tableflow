@@ -192,7 +192,7 @@ tr.n1 td.jour{background:#F2F0EC!important}
 /* =====================================================================
    CONFIGURATION
    ===================================================================== */
-const SUPABASE_URL = "https://auxnjixcppmsqmqkmjsj.supabase.co;
+const SUPABASE_URL = "https://auxnjixcppmsqmqkmjsj.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1eG5qaXhjcHBtc3FtcWttanNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NDkzNDIsImV4cCI6MjEwMDEyNTM0Mn0.sHT_4cpxIBaqaGTnLDevCjWcnLe8gn0dG1sTo6dbjXE";
 
 const POSTES = [
@@ -282,39 +282,93 @@ function pm(ca,cv){
 /* =====================================================================
    CONNEXION
    ===================================================================== */
+function panneau(type,titre,txt){
+  document.getElementById("corps").innerHTML =
+    `<div class="alerte a-${type}"><div><b>${titre}</b>${txt}</div></div>`;
+}
+
 async function init(){
-  if(SUPABASE_URL.indexOf("__")===0){
-    document.getElementById("corps").innerHTML =
-      `<div class="alerte a-erreur"><div><b>Module non configuré</b>
-       Les identifiants Supabase n'ont pas été renseignés dans ce fichier.</div></div>`;
-    return;
-  }
-  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const {data:{session}} = await sb.auth.getSession();
-  if(!session){ location.href = "index.html"; return; }
-  etat.utilisateur = session.user.email;
-  document.getElementById("qui").textContent = etat.utilisateur;
-
-  /* Droits : editeur si profil le permet */
   try{
-    const {data:p} = await sb.from("profils").select("role")
-                       .eq("id",session.user.id).single();
-    etat.edition = p && ["admin","editeur"].includes(p.role);
-  }catch(e){ etat.edition = true; }
-  const b=document.getElementById("mode");
-  b.textContent = etat.edition?"Édition":"Lecture";
-  b.className = "badge "+(etat.edition?"edition":"lecture");
+    if(SUPABASE_URL.indexOf("__")===0){
+      panneau("erreur","Module non configuré",
+        "Les identifiants Supabase n'ont pas été renseignés dans ce fichier.");
+      return;
+    }
+    if(typeof supabase==="undefined"){
+      panneau("erreur","Librairie non chargée",
+        "Le script Supabase n'a pas pu être téléchargé. Vérifiez votre connexion "
+        +"puis rechargez la page.");
+      return;
+    }
 
-  await charger();
-  construireNav();
-  rendre();
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    /* --- Session --- */
+    let session=null;
+    try{
+      const r = await sb.auth.getSession();
+      session = r.data ? r.data.session : null;
+    }catch(e){}
+
+    if(!session){
+      panneau("attention","Session expirée",
+        "Reconnectez-vous depuis l'accueil TableFlow, puis revenez sur ce module. "
+        +'<br><br><a href="index.html" style="color:inherit;font-weight:600">'
+        +"&rsaquo; Retour à l'accueil</a>");
+      return;
+    }
+    etat.utilisateur = session.user.email;
+    document.getElementById("qui").textContent = etat.utilisateur;
+
+    /* --- Droits : tolerant a l'absence de table profils --- */
+    etat.edition = true;                 /* par defaut : editeur */
+    try{
+      const {data:p,error:ep} = await sb.from("profils").select("role")
+                                  .eq("id",session.user.id).maybeSingle();
+      if(!ep && p && p.role) etat.edition = ["admin","editeur"].includes(p.role);
+    }catch(e){ /* pas de table profils : on reste editeur */ }
+
+    const b=document.getElementById("mode");
+    b.textContent = etat.edition?"Édition":"Lecture";
+    b.className = "badge "+(etat.edition?"edition":"lecture");
+
+    /* --- Donnees --- */
+    const ok = await charger();
+    if(!ok) return;
+
+    /* --- Se placer sur le dernier mois renseigne --- */
+    const cles=Object.keys(etat.donnees).sort();
+    if(cles.length){
+      const d=cles[cles.length-1];
+      etat.annee=+d.slice(0,4); etat.mois=+d.slice(5,7);
+    }
+
+    construireNav();
+    rendre();
+
+  }catch(err){
+    panneau("erreur","Le module n'a pas pu démarrer",
+      (err && err.message ? err.message : String(err))
+      + "<br><br>Signalez ce message pour correction.");
+    console.error(err);
+  }
 }
 
 async function charger(){
   const {data,error} = await sb.from("suivi_ca").select("jour,donnees");
-  if(error){ toast("Chargement impossible : "+error.message,true); return; }
+  if(error){
+    panneau("erreur","Données inaccessibles",
+      error.message
+      +"<br><br>Vérifiez que les deux requêtes SQL du module ont bien été "
+      +"exécutées dans Supabase (schéma puis données).");
+    return false;
+  }
   etat.donnees = {};
   (data||[]).forEach(r => etat.donnees[r.jour] = r.donnees || {});
+  if(!Object.keys(etat.donnees).length){
+    toast("Aucune donnée en base — lancez la requête d'import.",true);
+  }
+  return true;
 }
 
 /* =====================================================================
@@ -970,7 +1024,9 @@ document.getElementById("btn-excel").onclick=()=>{
   toast("Export généré");
 };
 
-init();
+if(document.readyState==='loading')
+  document.addEventListener('DOMContentLoaded',init);
+else init();
 </script>
 </body>
 </html>
