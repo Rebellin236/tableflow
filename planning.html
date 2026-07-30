@@ -310,26 +310,56 @@
 
   /* PRINT A3 */
   @media print {
-    @page { size: A3 landscape; margin: 8mm; }
-    html, body { width:420mm; background:#fff !important; }
-    .app-header, .tabs, .stats-bar, .legend, .dd-overlay, .dd-popup,
-    .cal-overlay, .cal-popup, .we-cell, .col-we, .btn-dup,
-    .btn-add-extra, .btn-del-extra { display:none !important; }
-    .notes-bar { background:#fffde7 !important; border-bottom:1px solid #e0b000 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .main { padding:3px !important; }
-    .team-section { margin-bottom:5px !important; }
-    .planning-table { border:1px solid #888 !important; font-size:9px !important; }
-    .planning-table th, .planning-table td { border:1px solid #aaa !important; padding:2px !important; }
-    .shift-cell { height:38px !important; }
+    @page { size: A3 landscape; margin: 6mm; }
+
+    /* Conserver TOUTES les couleurs de fond et de texte à l'impression */
+    *, *::before, *::after {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+
+    html, body { width:auto !important; background:#fff !important; margin:0 !important; }
+
+    /* Masquer uniquement l'interface non imprimable */
+    #tfband, #tfbar, .app-header, .tabs, .dd-overlay, .dd-popup,
+    .cal-overlay, .cal-popup, .modal-overlay, .btn-dup,
+    .btn-add-extra, .btn-del-extra, .plus-hint, .rh-badge, .rh-tip,
+    .shift-del, .cell-clear { display:none !important; }
+
+    /* Garder stats, légende et notes : ils portent l'information */
+    .stats-bar, .legend, .notes-bar { display:flex !important; }
+
+    /* Occuper toute la largeur de la feuille */
+    .main { padding:2px !important; }
+    .team-section { margin-bottom:4px !important; page-break-inside:avoid; }
+    .planning-table {
+      width:100% !important; table-layout:fixed !important;
+      border:1.5px solid #666 !important; font-size:9px !important;
+    }
+    .planning-table th, .planning-table td {
+      border:1px solid #999 !important; padding:2px !important;
+    }
+
+    /* Hauteur des cases : compacte mais lisible */
+    .shift-cell { min-height:36px !important; height:auto !important; }
     .shift-time-main { font-size:9px !important; }
     .shift-mission { font-size:7px !important; }
-    .stm, .shift-hrs-sm { font-size:8px !important; }
-    .pdj-row td { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .pdj-cell-input { border:none !important; background:transparent !important; font-size:12px !important; }
-    .rh-badge, .rh-tip { display:none !important; }
-    .name-cell { width:110px !important; }
-    .col-day { width:85px !important; }
-    .col-total { width:40px !important; }
+    .shift-code-sm, .shift-hrs-sm, .stm { font-size:8px !important; }
+
+    /* Champs de saisie rendus en texte simple, sans bordure d'écran */
+    input, select { border:none !important; background:transparent !important;
+                    -webkit-appearance:none !important; appearance:none !important; }
+    .pdj-cell-input { font-size:11px !important; text-align:center; }
+    .notes-input { font-size:11px !important; }
+
+    /* Largeurs de colonnes calées pour le A3 */
+    .name-cell, .extra-name-cell { width:120px !important; }
+    .col-day  { width:auto !important; }
+    .col-total{ width:44px !important; }
+
+    /* Empêcher les coupures au milieu d'une ligne d'employé */
+    tr { page-break-inside:avoid; }
   }
 
   /* COLONNE WEEK-ENDS */
@@ -372,14 +402,7 @@
   .btn-modal-manual:hover { border-color:#253161; color:#253161; }
   .modal-empty { padding:30px; text-align:center; color:#8891a0; font-size:13px; }
 
-  /* PRINT */
-  @media print {
-    .app-header, .tabs, .stats-bar, .legend, .notes-bar, .pdj-bar, .dd-overlay, .dd-popup, .cal-overlay, .cal-popup, .we-cell, .col-we, .btn-dup, .btn-add-extra, .btn-del-extra { display:none !important; }
-    body { background:#fff; }
-    .main { padding:4px; }
-    .planning-table { border:1px solid #888; }
-    .planning-table th, .planning-table td { border:1px solid #aaa; }
-  }
+  /* (bloc print fusionné plus haut) */
 
   /* Mini calendar */
   .btn-cal { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; width:30px; height:30px; border-radius:4px; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; transition:.15s; }
