@@ -27,6 +27,20 @@ body.tf-lecture #ed input, body.tf-lecture #ed button,
 body.tf-lecture #edit input, body.tf-lecture #edit button{
   pointer-events:none;opacity:.55}
 body.tf-lecture #tfbar a{pointer-events:auto;opacity:1}
+
+.stb{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin:2px 0 8px}
+.stb button{font-size:10px!important;padding:3px 8px!important;margin:0!important}
+.stb .dng{color:#A8321F!important;border-color:#EBC9C1!important}
+.stb label{font-size:10px;color:#8a8375;display:flex;gap:4px;align-items:center;margin-left:4px}
+.stb select{font-size:10.5px;padding:3px 4px;border:1px solid #e2dbcc;border-radius:5px;background:#fff}
+.stb .lb{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#a89f8f;font-weight:700;margin-right:2px}
+.addsec{display:block;width:100%;margin:6px 0 14px;padding:8px;border:1px dashed #C8A96A!important;
+  background:#FFFDF6!important;color:#9E7D3A!important;font-weight:700;font-size:11px;border-radius:6px;cursor:pointer}
+.addsec:hover{background:#FBF3E0!important}
+.sbed{display:flex;gap:6px;align-items:center;margin:9px 0 4px}
+.sbed input{flex:1;font-weight:600;font-style:italic;font-size:11.5px;padding:5px 7px;
+  border:1px solid #e2dbcc;border-radius:5px;background:#fdfcfa}
+.pgbox{border:1px solid #E8DFC9;background:#FDFBF6;border-radius:7px;padding:8px 10px;margin:4px 0 12px}
 </style><style>*{margin:0;padding:0;box-sizing:border-box}</style>
 <style>
 .sheet{width:210mm;height:297mm;background:#FCF8F1;position:relative;
@@ -553,8 +567,11 @@ function render(){
   const c=C();
   // 1) fabriquer la liste des blocs de contenu (chaque bloc = une section entière)
   let blocs=[]; let ckBuf=[];
+  const videCk=()=>{ if(!ckBuf.length) return; const g=ckBuf.join('');
+    blocs.push((g.indexOf(PB)>=0?PB:'')+'<div class="grp">'+g.split(PB).join('')+'</div>'); ckBuf=[]; };
   if(carte==='drinks'){
     c.blocs.forEach(x=>{
+      if(x.type!=='ckt' || x.saut) videCk();
       if(x.type==='rhum'){
         // bloc unique insécable : les rhums tiennent sur une seule page
         let h='<div class="sec rhums"><div class="sectl">'+esc(x.nom)+'</div>';
@@ -567,14 +584,15 @@ function render(){
             '</span><span class="ld"></span><span class="px">'+esc(it[1])+'</span></div>');
           h+='</div>';
         });
-        blocs.push(h+'</div></div>');
+        blocs.push((x.saut?PB:'')+h+'</div></div>');
       } else if(x.type==='ckt'){
-        ckBuf.push(rSec({nom:x.nom,prix:x.prix,items:x.items},'ckt'));
-        if(ckBuf.length===3){ blocs.push('<div class="grp">'+ckBuf.join('')+'</div>'); ckBuf=[]; }
+        ckBuf.push((x.saut?PB:'')+rSec({nom:x.nom,prix:x.prix,items:x.items},'ckt'));
+        if(ckBuf.length===3) videCk();
       } else {
-        blocs.push(rSec({nom:x.nom,unit:x.unit,subs:x.subs,items:x.items},'list'));
+        blocs.push((x.saut?PB:'')+rSec({nom:x.nom,unit:x.unit,subs:x.subs,items:x.items},'list'));
       }
     });
+    videCk();
     if(c.note) blocs.push('<div class="note">'+esc(c.note)+
       (c.noteprix?' <b>· '+esc(c.noteprix)+'</b>':'')+'</div>');
   } else if(carte==='wine'){
@@ -584,11 +602,11 @@ function render(){
     e.subs.forEach(x=>{ h+='<div class="subtl">'+esc(x.nom)+'</div>';
       x.items.forEach(w=>h+=rWn(w)); });
     blocs.push(h+'</div>');
-    c.sections.forEach(x=>blocs.push(rSec(x,'wine')));
+    c.sections.forEach(x=>blocs.push((x.saut?PB:'')+rSec(x,'wine')));
   } else if(carte==='food'){
     blocs.push('<div class="grp">'+c.sections.map(x=>rSec(x,'list')).join('')+'</div>');
   } else {
-    c.sections.forEach(x=>blocs.push(rSec(x,'list')));
+    c.sections.forEach(x=>blocs.push((x.saut?PB:'')+rSec(x,'list')));
   }
 
   // 2) essayer densité 1, puis 2, puis 3 jusqu'à ce que ça tienne
@@ -619,6 +637,8 @@ function paginer(blocs, dens, c){
     return sh.scrollHeight<=sh.clientHeight+2;
   };
   blocs.forEach(b=>{
+    if(b.indexOf(PB)===0){ b=b.slice(PB.length);
+      if(cur.length){ pages.push(sheet(headOrCont(first,c)+cur.join(''),dens)); first=false; cur=[]; } }
     const essai=cur.concat([b]);
     if(test(essai,first)){ cur=essai; }
     else{
@@ -718,6 +738,104 @@ function rhR(arr,i){
   d.appendChild(delB(()=>arr.splice(i,1)));
   return d;
 }
+
+/* ---------- STRUCTURE : sections, sous-rubriques, sauts de page (FR + EN) ---------- */
+function lesDeuxC(fn){ ['fr','en'].forEach(l=>{ if(D[l]&&D[l][carte]) fn(D[l][carte], l); }); }
+function libL(l, fr, en){ return l==='fr'?fr:en; }
+function majStruct(){ ed(); render(); save(); }
+function btn(txt, cb, cls, titre){
+  const b=document.createElement('button'); b.textContent=txt; if(cls) b.className=cls;
+  if(titre) b.title=titre; b.onclick=cb; return b;
+}
+function listeSec(c){ return carte==='drinks' ? c.blocs : c.sections; }
+function ajouterSectionR(type){
+  lesDeuxC((c,l)=>{
+    const nom=libL(l,'Nouvelle section','New section');
+    if(carte==='drinks'){
+      c.blocs=c.blocs||[];
+      const b = type==='ckt' ? {type:'ckt', nom:nom, prix:'', items:[]}
+                             : {type:'list', nom:nom, unit:'', items:[]};
+      // on insère avant le bloc Rhums (qui reste en fin de carte)
+      const ir=c.blocs.findIndex(x=>x.type==='rhum');
+      if(ir>=0) c.blocs.splice(ir,0,b); else c.blocs.push(b);
+    } else {
+      c.sections=c.sections||[]; c.sections.push({nom:nom, items:[]});
+    }
+  });
+  majStruct();
+  setTimeout(()=>{ const a=document.querySelectorAll('#ed .i-secname');
+    const x=[...a].find(e=>/^(Nouvelle section|New section)$/.test(e.value))||a[a.length-1];
+    if(x){ x.focus(); x.select(); x.scrollIntoView({block:'center'}); } },60);
+}
+function supprimerSectionR(i){
+  const A=listeSec(C()), S=A[i];
+  if(!confirm('Supprimer la section « '+String(S.nom).replace(/&amp;/g,'&')+' » et toutes ses lignes ?\n\n'+
+              'Elle sera retirée en français ET en anglais.')) return;
+  lesDeuxC(c=>{ const X=listeSec(c); if(X&&i<X.length) X.splice(i,1); });
+  majStruct();
+}
+function deplacerSectionR(i,d){
+  const n=listeSec(C()).length, j=i+d; if(j<0||j>=n) return;
+  lesDeuxC(c=>{ const X=listeSec(c); if(!X||j>=X.length) return; const x=X.splice(i,1)[0]; X.splice(j,0,x); });
+  majStruct();
+}
+function ajouterSousRubriqueR(i){
+  lesDeuxC((c,l)=>{ const S=listeSec(c)[i]; if(!S) return;
+    S.subs=S.subs||[]; S.subs.push({nom:libL(l,'Nouvelle sous-rubrique','New sub-heading'), items:[]}); });
+  majStruct();
+}
+function supprimerSousRubriqueR(i,j){
+  const S=listeSec(C())[i], nb=(S.subs[j].items||[]).length;
+  if(!confirm('Supprimer la sous-rubrique « '+S.subs[j].nom+' »'+(nb?' et ses '+nb+' ligne(s)':'')+' ?')) return;
+  lesDeuxC(c=>{ const X=listeSec(c)[i]; if(X&&X.subs) X.subs.splice(j,1); });
+  majStruct();
+}
+function sautPageR(i,v){
+  lesDeuxC(c=>{ const X=listeSec(c)[i]; if(X) X.saut=v; }); render(); save();
+}
+function outilsSectionR(i,S){
+  const n=listeSec(C()).length;
+  const d=document.createElement('div'); d.className='stb';
+  if(i>0) d.appendChild(btn('Monter',()=>deplacerSectionR(i,-1),'','Monter la section'));
+  if(i<n-1) d.appendChild(btn('Descendre',()=>deplacerSectionR(i,1),'','Descendre la section'));
+  const typ = carte==='drinks' ? S.type : 'list';
+  if(typ==='list') d.appendChild(btn('+ Sous-rubrique',()=>ajouterSousRubriqueR(i),'',
+     'Ex. : « À la pression » / « En bouteille » dans Bières'));
+  if(carte!=='food' && typ!=='rhum'){
+    const lab=document.createElement('label');
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!S.saut;
+    cb.onchange=()=>sautPageR(i,cb.checked);
+    lab.appendChild(cb); lab.appendChild(document.createTextNode('Commencer sur une nouvelle page'));
+    d.appendChild(lab);
+  }
+  if(typ!=='rhum') d.appendChild(btn('Supprimer la section',()=>supprimerSectionR(i),'dng'));
+  return d;
+}
+function editeurSousRubriqueR(i,j,sub){
+  const d=document.createElement('div'); d.className='sbed';
+  const x=document.createElement('input'); x.value=sub.nom||''; x.placeholder='Nom de la sous-rubrique';
+  x.addEventListener('input',()=>{ sub.nom=x.value; render(); save(); });
+  d.appendChild(x);
+  d.appendChild(btn('×',()=>supprimerSousRubriqueR(i,j),'del','Supprimer la sous-rubrique'));
+  return d;
+}
+function blocAjoutSectionR(){
+  const w=document.createElement('div');
+  if(carte==='drinks'){
+    w.className='stb';
+    const a=btn('+ Section (liste)',()=>ajouterSectionR('list'),'addsec'); a.style.width='auto'; a.style.flex='1';
+    const b=btn('+ Section cocktails',()=>ajouterSectionR('ckt'),'addsec'); b.style.width='auto'; b.style.flex='1';
+    w.appendChild(a); w.appendChild(b);
+  } else w.appendChild(btn('+ Ajouter une section',()=>ajouterSectionR('list'),'addsec'));
+  const n=document.createElement('div');
+  n.style.cssText='font-size:10px;color:#8a8375;line-height:1.45;margin:-8px 0 12px';
+  n.textContent='Les pages se créent toutes seules quand le contenu dépasse. '+
+                'Pour forcer une section en haut d’une nouvelle page : cochez « Commencer sur une nouvelle page ».';
+  if(carte!=='food') w.appendChild(n);
+  return w;
+}
+const PB='<!--pb-->';
+
 function ed(){
   const c=C(), h=document.getElementById('ed');
   h.innerHTML='';
@@ -748,16 +866,16 @@ function ed(){
     });
     h.appendChild(s);
   }
-  (c.sections||[]).forEach(sec=>{
+  (c.sections||[]).forEach((sec,seci)=>{
     const s=document.createElement('div'); s.className='sc';
     s.innerHTML='<h3>'+esc(sec.nom)+'</h3>';
+    s.appendChild(outilsSectionR(seci,sec));
     const rn=document.createElement('div'); rn.className='r';
-    rn.appendChild(inp(sec.nom,'n',v=>sec.nom=v,'Nom de section'));
+    rn.appendChild(inp(sec.nom,'n i-secname',v=>sec.nom=v,'Nom de section'));
     s.appendChild(rn);
     const kind = carte==='wine'?'wine':'list';
-    if(sec.subs) sec.subs.forEach(x=>{
-      const hh=document.createElement('div'); hh.className='sb';
-      hh.innerHTML='<h4>'+esc(x.nom)+'</h4>'; s.appendChild(hh);
+    if(sec.subs) sec.subs.forEach((x,xi)=>{
+      s.appendChild(editeurSousRubriqueR(seci,xi,x));
       x.items.forEach((_,i)=>s.appendChild(kind==='wine'?wnR(x.items,i):itR(x.items,i)));
       s.appendChild(addB('ligne',()=>x.items.push(
         kind==='wine'?['','Nouveau vin','','','','']:['Nouvel article','','0€','',''])));
@@ -769,11 +887,13 @@ function ed(){
     }
     h.appendChild(s);
   });
-  (c.blocs||[]).forEach(b=>{
+  (c.blocs||[]).forEach((b,bi)=>{
     const s=document.createElement('div'); s.className='sc';
     s.innerHTML='<h3>'+esc(b.nom)+'</h3>';
+    s.appendChild(outilsSectionR(bi,b));
     const rn=document.createElement('div'); rn.className='r';
-    rn.appendChild(inp(b.nom,'n',v=>b.nom=v,'Nom'));
+    rn.appendChild(inp(b.nom,'n i-secname',v=>b.nom=v,'Nom'));
+    if(b.type==='list') rn.appendChild(inp(b.unit||'','c',v=>b.unit=v,'Unité (ex. 4 cl)'));
     if(b.prix!==undefined) rn.appendChild(inp(b.prix,'p',v=>b.prix=v,'Prix'));
     s.appendChild(rn);
     if(b.type==='rhum'){
@@ -787,9 +907,8 @@ function ed(){
         s.appendChild(addB('rhum',()=>p[2].push(['Nouveau rhum','0€'])));
       });
     } else {
-      if(b.subs) b.subs.forEach(x=>{
-        const hh=document.createElement('div'); hh.className='sb';
-        hh.innerHTML='<h4>'+esc(x.nom)+'</h4>'; s.appendChild(hh);
+      if(b.subs) b.subs.forEach((x,xi)=>{
+        s.appendChild(editeurSousRubriqueR(bi,xi,x));
         x.items.forEach((_,i)=>s.appendChild(itR(x.items,i)));
         s.appendChild(addB('ligne',()=>x.items.push(['Nouvel article','','0€','',''])));
       });
@@ -804,6 +923,7 @@ function ed(){
     h.appendChild(s);
   });
 
+  h.appendChild(blocAjoutSectionR());
   const rc=document.createElement('div'); rc.className='sc';
   rc.innerHTML='<h3>Relecture</h3>';
   const bv=document.createElement('button'); bv.textContent='Vérifier les textes';
