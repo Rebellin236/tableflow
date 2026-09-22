@@ -28,6 +28,20 @@
 #tfbar .qui b{color:#1F1B16}
 .tf-lecture #edit input,.tf-lecture #edit button,.tf-lecture #edit select{
   pointer-events:none;opacity:.55}
+
+.stb{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin:2px 0 8px}
+.stb button{font-size:10px!important;padding:3px 8px!important;margin:0!important}
+.stb .dng{color:#A8321F!important;border-color:#EBC9C1!important}
+.stb label{font-size:10px;color:#8a8375;display:flex;gap:4px;align-items:center;margin-left:4px}
+.stb select{font-size:10.5px;padding:3px 4px;border:1px solid #e2dbcc;border-radius:5px;background:#fff}
+.stb .lb{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#a89f8f;font-weight:700;margin-right:2px}
+.addsec{display:block;width:100%;margin:6px 0 14px;padding:8px;border:1px dashed #C8A96A!important;
+  background:#FFFDF6!important;color:#9E7D3A!important;font-weight:700;font-size:11px;border-radius:6px;cursor:pointer}
+.addsec:hover{background:#FBF3E0!important}
+.sbed{display:flex;gap:6px;align-items:center;margin:9px 0 4px}
+.sbed input{flex:1;font-weight:600;font-style:italic;font-size:11.5px;padding:5px 7px;
+  border:1px solid #e2dbcc;border-radius:5px;background:#fdfcfa}
+.pgbox{border:1px solid #E8DFC9;background:#FDFBF6;border-radius:7px;padding:8px 10px;margin:4px 0 12px}
 </style>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -798,6 +812,139 @@ function rhumRow(arr,i,ch){
   d.appendChild(delBtn(()=>{ if(ch) supprimerLigne(ch,i); else arr.splice(i,1); }));
   return d;
 }
+
+/* ---------- STRUCTURE : pages & sections (FR + EN ensemble) ---------- */
+function lesDeux(fn){ ['fr','en'].forEach(l=>{ if(D[l]) fn(D[l], l); }); }
+function libL(l, fr, en){ return l==='fr'?fr:en; }
+function majStructure(){ buildNav(); buildEditor(); renderPreview(); save(); }
+function btn(txt, cb, cls, titre){
+  const b=document.createElement('button'); b.textContent=txt; if(cls) b.className=cls;
+  if(titre) b.title=titre; b.onclick=cb; return b;
+}
+function nouvellePage(type){
+  const at=page;                       // insérée juste après la page affichée
+  const id='p'+Date.now();
+  lesDeux((M,l)=>{
+    const s={name:libL(l,'Nouvelle section','New section'), items:[]};
+    const p={id:id, title:libL(l,'Nouvelle page','New page'), subtitle:'', layout:'flow', sections:[s]};
+    if(type==='cocktails'){ p.type='cocktails'; p.layout='spread'; s.price=''; }
+    M.pages.splice(Math.min(at,M.pages.length),0,p);
+  });
+  page=at+1; majStructure();
+}
+function supprimerPage(){
+  const P=D[lang].pages[page-1]; if(!P) return;
+  const t=document.createElement('div'); t.innerHTML=P.title;
+  if(!confirm('Supprimer la page « '+t.textContent+' » et tout son contenu ?\n\n'+
+              'Elle sera retirée en français ET en anglais.')) return;
+  lesDeux(M=>M.pages.splice(page-1,1));
+  page=Math.min(page, D.fr.pages.length); majStructure();
+}
+function deplacerPage(d){
+  const i=page-1, j=i+d;
+  if(j<0 || j>=D.fr.pages.length) return;
+  lesDeux(M=>{ const x=M.pages.splice(i,1)[0]; M.pages.splice(j,0,x); });
+  page=j+1; majStructure();
+}
+function mettrePageLayout(v){
+  lesDeux(M=>{ const P=M.pages[page-1]; if(P) P.layout=v; }); renderPreview(); save();
+}
+function outilsPage(p){
+  const box=document.createElement('div'); box.className='sec pgbox';
+  const l1=document.createElement('div'); l1.className='stb';
+  const lb=document.createElement('span'); lb.className='lb'; lb.textContent='Pages'; l1.appendChild(lb);
+  l1.appendChild(btn('+ Nouvelle page',()=>nouvellePage('list'),'','Ajoute une page de liste (article · volume · prix) après celle-ci'));
+  l1.appendChild(btn('+ Page cocktails',()=>nouvellePage('cocktails'),'','Ajoute une page cocktails (nom · volume · ingrédients) après celle-ci'));
+  if(p){
+    l1.appendChild(btn('Déplacer avant',()=>deplacerPage(-1),'','Déplacer la page vers la gauche'));
+    l1.appendChild(btn('Déplacer après',()=>deplacerPage(1),'','Déplacer la page vers la droite'));
+    l1.appendChild(btn('Supprimer la page',supprimerPage,'dng'));
+  }
+  box.appendChild(l1);
+  if(p && p.type!=='rhums' && p.type!=='wines'){
+    const l2=document.createElement('div'); l2.className='stb';
+    const lab=document.createElement('label'); lab.textContent='Mise en page';
+    const se=document.createElement('select');
+    [['flow','Normale'],['spread','Aérée (répartie sur la hauteur)'],['dense','Compacte (listes longues)']]
+      .forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t;
+        if((p.layout||'flow')===v) o.selected=true; se.appendChild(o); });
+    se.onchange=()=>mettrePageLayout(se.value);
+    lab.appendChild(se); l2.appendChild(lab); box.appendChild(l2);
+  }
+  return box;
+}
+function ajouterSection(){
+  const pg=page-1;
+  lesDeux((M,l)=>{
+    const P=M.pages[pg]; if(!P) return; P.sections=P.sections||[];
+    const s={name:libL(l,'Nouvelle section','New section'), items:[]};
+    if(P.type==='cocktails') s.price='';
+    P.sections.push(s);
+  });
+  majStructure();
+  setTimeout(()=>{ const a=document.querySelectorAll('#edit .i-secname'); const x=a[a.length-1];
+    if(x){ x.focus(); x.select(); x.scrollIntoView({block:'center'}); } },60);
+}
+function supprimerSection(i){
+  const S=D[lang].pages[page-1].sections[i];
+  const t=document.createElement('div'); t.innerHTML=S.name;
+  if(!confirm('Supprimer la section « '+t.textContent+' » et toutes ses lignes ?\n\n'+
+              'Elle sera retirée en français ET en anglais.')) return;
+  lesDeux(M=>{ const P=M.pages[page-1]; if(P&&P.sections) P.sections.splice(i,1); });
+  majStructure();
+}
+function deplacerSection(i,d){
+  const j=i+d, n=D[lang].pages[page-1].sections.length;
+  if(j<0||j>=n) return;
+  lesDeux(M=>{ const A=M.pages[page-1].sections; if(!A||j>=A.length) return;
+    const x=A.splice(i,1)[0]; A.splice(j,0,x); });
+  majStructure();
+}
+function ajouterSousRubrique(i){
+  lesDeux((M,l)=>{ const S=M.pages[page-1].sections[i]; if(!S) return;
+    S.subs=S.subs||[]; S.subs.push({name:libL(l,'Nouvelle sous-rubrique','New sub-heading'), items:[]}); });
+  majStructure();
+}
+function supprimerSousRubrique(i,j){
+  const S=D[lang].pages[page-1].sections[i];
+  const nb=(S.subs[j].items||[]).length;
+  if(!confirm('Supprimer la sous-rubrique « '+S.subs[j].name+' »'+(nb?' et ses '+nb+' ligne(s)':'')+' ?')) return;
+  lesDeux(M=>{ const X=M.pages[page-1].sections[i]; if(X&&X.subs) X.subs.splice(j,1); });
+  majStructure();
+}
+function outilsSection(i,n,P){
+  const d=document.createElement('div'); d.className='stb';
+  if(i>0) d.appendChild(btn('Monter',()=>deplacerSection(i,-1),'','Monter la section'));
+  if(i<n-1) d.appendChild(btn('Descendre',()=>deplacerSection(i,1),'','Descendre la section'));
+  if(P.type!=='cocktails') d.appendChild(btn('+ Sous-rubrique',()=>ajouterSousRubrique(i),'',
+     'Ex. : « À la pression » / « En bouteille » dans Bières'));
+  d.appendChild(btn('Supprimer la section',()=>supprimerSection(i),'dng'));
+  return d;
+}
+function editeurSousRubrique(i,j,sub){
+  const d=document.createElement('div'); d.className='sbed';
+  const x=document.createElement('input'); x.value=sub.name||''; x.placeholder='Nom de la sous-rubrique';
+  x.addEventListener('input',()=>{
+    const E=D.en&&D.en.pages[page-1]&&D.en.pages[page-1].sections[i];
+    refletNom(E&&E.subs&&E.subs[j],'name',sub.name,x.value);
+    sub.name=x.value; renderPreview(); save(); });
+  d.appendChild(x);
+  d.appendChild(btn('×',()=>supprimerSousRubrique(i,j),'del','Supprimer la sous-rubrique'));
+  return d;
+}
+/* Nom de section / sous-rubrique / page : report automatique vers l'anglais
+   tant que la version anglaise n'a pas été retouchée à la main */
+function refletNom(objEN, cle, ancienFR, nouveau){
+  if(lang!=='fr' || !objEN) return;
+  const tr=t=>{ try{ const r=traduire(t,'en'); return (r&&r.txt&&!(r.manquants||[]).length)?r.txt:t; }catch(e){ return t; } };
+  const en=String(objEN[cle]||'');
+  const auto=['','New section','New sub-heading','New page'];
+  if(auto.includes(en) || en===ancienFR || en===tr(ancienFR)) objEN[cle]=nouveau.trim()?tr(nouveau):'';
+}
+function boutonAjoutSection(){
+  return btn('+ Ajouter une section',ajouterSection,'addsec');
+}
+
 function buildEditor(){
   const M=D[lang], host=document.getElementById('edit');
   host.innerHTML='';
@@ -829,18 +976,20 @@ function buildEditor(){
       s2.appendChild(r);
     });
     host.appendChild(s2);
+    host.appendChild(outilsPage(null));
     return;
   }
   const p=M.pages[page-1];
   const ttl=document.createElement('div'); ttl.className='sec';
   ttl.innerHTML='<h3>Titre de page</h3>';
   const r0=document.createElement('div'); r0.className='row';
-  r0.appendChild(inp(p.title,'i-name',v=>p.title=v,'Titre'));
+  r0.appendChild(inp(p.title,'i-name',v=>{ refletNom(D.en&&D.en.pages[page-1],'title',p.title,v); p.title=v; buildNav(); },'Titre'));
   ttl.appendChild(r0);
   const r1=document.createElement('div'); r1.className='row';
   r1.appendChild(inp(p.subtitle,'i-desc',v=>p.subtitle=v,'Sous-titre'));
   ttl.appendChild(r1);
   host.appendChild(ttl);
+  host.appendChild(outilsPage(p));
 
   if(p.type==='rhums'){
     p.countries.forEach((c,ci)=>{
@@ -872,13 +1021,15 @@ function buildEditor(){
   (p.sections||[]).forEach((sec,seci)=>{
     const s=document.createElement('div'); s.className='sec';
     const h=document.createElement('h3'); h.innerHTML=sec.name; s.appendChild(h);
+    s.appendChild(outilsSection(seci,(p.sections||[]).length,p));
     const rn=document.createElement('div'); rn.className='row';
-    rn.appendChild(inp(sec.name,'i-name',v=>sec.name=v,'Nom de section'));
+    rn.appendChild(inp(sec.name,'i-name i-secname',v=>{
+      const E=D.en&&D.en.pages[page-1]&&D.en.pages[page-1].sections[seci];
+      refletNom(E,'name',sec.name,v); sec.name=v;},'Nom de section'));
     if(sec.price!==undefined) rn.appendChild(inp(sec.price,'i-px',v=>sec.price=v,'Prix'));
     s.appendChild(rn);
     if(sec.subs) sec.subs.forEach((sub,sbi)=>{
-      const hh=document.createElement('div'); hh.className='sub';
-      hh.innerHTML='<h4>'+sub.name+'</h4>'; s.appendChild(hh);
+      s.appendChild(editeurSousRubrique(seci,sbi,sub));
       const chS={pg:page-1,sec:seci,sub:sbi};
       const kd = p.type==='wines'?'wine':'list';
       sub.items.forEach((_,i)=>s.appendChild(
@@ -898,6 +1049,7 @@ function buildEditor(){
     }
     host.appendChild(s);
   });
+  if(p.type!=='rhums') host.appendChild(boutonAjoutSection());
 }
 function buildNav(){
   const M=D[lang], n=document.getElementById('nav');
