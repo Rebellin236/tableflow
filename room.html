@@ -204,6 +204,8 @@ button.on{background:#1F1B16;color:#fff;border-color:#1F1B16}
 </style><style>
 @page{size:210mm 297mm;margin:0}
 @media print{
+  #tfbar, #tfband, .tfbar, .tf-band { display:none !important; }
+  *, *::before, *::after { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
  body{background:#fff!important}
  #panel,#st{display:none!important}
  #app{display:block!important;height:auto!important;overflow:visible!important}
